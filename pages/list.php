@@ -40,32 +40,15 @@ html_page_top();
 
 <?php
 if ($ids) {
+    ?>
+    <h2>Tickets listés</h2>
+    <?php
     $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
         . " WHERE b.id in (" . join(',', $ids) . ")"
         . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
         . " ORDER BY b.id ASC";
-    $result = db_query($sql);
+    echo tableOfTickets(db_query($sql));
     ?>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>status</th>
-                <th>summary</th>
-            </tr>
-        </thead>
-        <tbody>
-    <?php
-    foreach ($result as $row) {
-        echo "<tr>"
-            . "<td>" . string_get_bug_view_link($row['id'], null, false) . "</td>"
-            . '<td bgcolor="' . get_status_color($row['status']) . '">' . get_enum_element('status', $row['status']) . "</td>"
-            . "<td>" . string_display($row['summary']) . "</td>"
-            . "</tr>";
-    }
-    ?>
-        </tbody>
-    </table>
 
     <h2>Non validés</h2>
     <?php
@@ -73,31 +56,47 @@ if ($ids) {
         . "WHERE b.id in (" . join(',', $ids) . ") AND b.status <> 85"
         . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
         . " ORDER BY b.id ASC";
-    $result = db_query($sql);
+    echo tableOfTickets(db_query($sql));
     ?>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>status</th>
-                <th>summary</th>
-            </tr>
-        </thead>
-        <tbody>
+
+    <h2>Non finis</h2>
     <?php
-    foreach ($result as $row) {
-        echo "<tr>"
-            . "<td>" . string_get_bug_view_link($row['id'], null, false) . "</td>"
-            . '<td bgcolor="' . get_status_color($row['status']) . '">' . get_enum_element('status', $row['status']) . "</td>"
-            . "<td>" . string_display($row['summary']) . "</td>"
-            . "</tr>";
-    }
-    ?>
-        </tbody>
-    </table>
-    <?php
+    $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
+        . "WHERE b.id in (" . join(',', $ids) . ") AND b.status < 80"
+        . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+        . " ORDER BY b.id ASC";
+    echo tableOfTickets(db_query($sql));
 }
 ?>
 
 <?php
 html_page_bottom();
+
+function tableOfTickets($rows) {
+    if (db_num_rows($rows) === 0) {
+        return "<p>Aucun.</p>";
+    }
+    $html = "
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>status</th>
+            <th>summary</th>
+        </tr>
+    </thead>
+    <tbody>
+";
+    foreach ($rows as $row) {
+        $html .= "<tr>"
+            . "<td>" . string_get_bug_view_link($row['id'], null, false) . "</td>"
+            . '<td bgcolor="' . get_status_color($row['status']) . '">' . get_enum_element('status', $row['status']) . "</td>"
+            . "<td>" . string_display($row['summary']) . "</td>"
+            . "</tr>";
+    }
+    $html .= "
+    </tbody>
+</table>
+";
+    return $html;
+}
