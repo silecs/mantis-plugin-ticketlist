@@ -17,7 +17,11 @@ if (empty($_GET['ids'])) {
             preg_split('/[,\n\s]+/', $_GET['ids'])
         )
     );
-
+    // redirect to a cleaner URL
+    if ($ids && strpos($_GET['ids'], "\n") !== false) {
+        header("Location: " . plugin_page('list') . '&ids=' . join(',', $ids));
+        exit();
+    }
 }
 
 
@@ -41,6 +45,10 @@ html_page_top();
 <?php
 if ($ids) {
     ?>
+    <p>
+        <a href="<?= plugin_page('list') ?>&amp;ids=<?= join(',', $ids) ?>">lien vers cette page</a>
+    </p>
+
     <h2>Tickets listés</h2>
     <?php
     $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
