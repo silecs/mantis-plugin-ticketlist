@@ -48,12 +48,8 @@ class TicketListPlugin extends MantisPlugin
      */
     public function onMenuSummary()
     {
-        if (access_has_global_level(config_get('manage_site_threshold'))) {
-            return [
-                '<a href="' . plugin_page('list') . '">Lister des tickets</a>',
-            ];
-        } else {
-            return [];
-        }
+        return [
+            '<a href="' . plugin_page('list') . '">Lister des tickets</a>',
+        ];
     }
 }

@@ -3,7 +3,10 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html  GNU GPL v3
  */
 
-access_ensure_global_level(config_get('manage_site_threshold'));
+access_ensure_project_level(config_get('view_summary_threshold'));
+
+$projectId = helper_get_current_project();
+$isAdmin = (boolean) access_has_global_level(config_get('manage_site_threshold'));
 
 if (empty($_GET['ids'])) {
     $ids = [];
@@ -37,8 +40,10 @@ html_page_top();
 
 <?php
 if ($ids) {
-    $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
-        . "WHERE id in (" . join(',', $ids) . ") ORDER BY id ASC";
+    $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
+        . " WHERE b.id in (" . join(',', $ids) . ")"
+        . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+        . " ORDER BY b.id ASC";
     $result = db_query($sql);
     ?>
     <table>
@@ -65,7 +70,9 @@ if ($ids) {
     <h2>Non validés</h2>
     <?php
     $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
-        . "WHERE id in (" . join(',', $ids) . ") AND status <> 85 ORDER BY id ASC";
+        . "WHERE b.id in (" . join(',', $ids) . ") AND b.status <> 85"
+        . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+        . " ORDER BY b.id ASC";
     $result = db_query($sql);
     ?>
     <table>
