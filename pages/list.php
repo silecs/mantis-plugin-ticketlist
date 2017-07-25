@@ -32,6 +32,13 @@ html_page_top();
 </h1>
 
 <div>
+    <div>
+        <caption>Mémo</catption>
+        <dl>
+            <dt>hg</dt>
+            <dd><code>hg hist -b default -r "default % ancestor(default,production)" | pl -ne 'say $1 if /#(\d+)/' | sort -n | uniq</code>
+        </dl>
+    </div>
     <form action="<?= plugin_page('list') ?>" method="get">
         <p>
             <input type="hidden" name="page" value="TicketList/list" />
@@ -50,13 +57,17 @@ if ($ids) {
     </p>
 
     <h2>Tickets listés</h2>
+    <form method="post" action="bug_actiongroup_page.php">
     <?php
     $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
         . " WHERE b.id in (" . join(',', $ids) . ")"
         . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
         . " ORDER BY b.id ASC";
-    echo tableOfTickets(db_query($sql));
+    echo tableOfTickets(db_query($sql), true);
     ?>
+        <input type="hidden" name="action" value="CLOSE" />
+        <button type="submit">Fermer les tickets sélectionnés</button>
+    </form>
 
     <h2>Non validés</h2>
     <?php
@@ -80,14 +91,14 @@ if ($ids) {
 <?php
 html_page_bottom();
 
-function tableOfTickets($rows) {
+function tableOfTickets($rows, $selectable = false) {
     if (db_num_rows($rows) === 0) {
         return "<p>Aucun.</p>";
     }
     $html = "
 <table>
     <thead>
-        <tr>
+        <tr>" . ($selectable ? "<th></th>" : "") . "
             <th>ID</th>
             <th>status</th>
             <th>summary</th>
@@ -97,6 +108,7 @@ function tableOfTickets($rows) {
 ";
     foreach ($rows as $row) {
         $html .= "<tr>"
+            . ($selectable ? '<td><input type="checkbox" name="bug_arr[]" value="' . (int) $row['id'] . '"></td>' : "")
             . "<td>" . string_get_bug_view_link($row['id'], null, false) . "</td>"
             . '<td bgcolor="' . get_status_color($row['status']) . '">' . get_enum_element('status', $row['status']) . "</td>"
             . "<td>" . string_display($row['summary']) . "</td>"
