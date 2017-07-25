@@ -4,8 +4,6 @@
  */
 
 /**
- * TimeAccount is a Mantis plugin.
- *
  * @author François Gannaz <francois.gannaz@silecs.info>
  */
 class TicketListPlugin extends MantisPlugin
@@ -17,7 +15,7 @@ class TicketListPlugin extends MantisPlugin
     {
         $this->name = 'Ticket List';
         $this->description = "Plugin that displays the state of a list of tickets.";
-        $this->page = 'status';
+        $this->page = 'list';
 
         $this->version = '1.0';
         $this->requires = [
