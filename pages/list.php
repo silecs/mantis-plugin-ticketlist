@@ -32,13 +32,6 @@ html_page_top();
 </h1>
 
 <div>
-    <div>
-        <caption>Mémo</catption>
-        <dl>
-            <dt>hg</dt>
-            <dd><code>hg hist -b default -r "default % ancestor(default,production)" | pl -ne 'say $1 if /#(\d+)/' | sort -n | uniq</code>
-        </dl>
-    </div>
     <form action="<?= plugin_page('list') ?>" method="get">
         <p>
             <input type="hidden" name="page" value="TicketList/list" />
