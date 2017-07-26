@@ -25,6 +25,8 @@ class TicketListPlugin extends MantisPlugin
         $this->author = 'François Gannaz / Silecs';
         $this->contact = 'francois.gannaz@silecs.info';
         $this->url = '';
+
+        $this->nonce = crypto_generate_uri_safe_nonce(16);
     }
 
     /**
@@ -35,8 +37,17 @@ class TicketListPlugin extends MantisPlugin
     public function hooks()
     {
         return [
+            'EVENT_CORE_HEADERS' => 'csp_headers',
             'EVENT_MENU_SUMMARY' => 'onMenuSummary',
+            'EVENT_LAYOUT_RESOURCES' => 'loadJs',
         ];
+    }
+
+    /**
+     * Add Content Security Policy headers for our script.
+     */
+    function csp_headers() {
+        http_csp_add( 'script-src', "'nonce-{$this->nonce}'" );
     }
 
     /**
@@ -49,5 +60,26 @@ class TicketListPlugin extends MantisPlugin
         return [
             '<a href="' . plugin_page('list') . '">Lister des tickets</a>',
         ];
+    }
+
+    public function loadJs()
+    {
+        return <<<EOJS
+<script type="text/javascript" nonce="{$this->nonce}">
+window.addEventListener('load', function() {
+    document.querySelector('input.checkall').addEventListener(
+        'click',
+        function(e) {
+            e.target.parentNode
+                .querySelectorAll('input[type=checkbox][value]')
+                .forEach(function(c) {
+                    c.click();
+                });
+        }
+    );
+});
+</script>
+EOJS
+        ;
     }
 }

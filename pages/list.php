@@ -59,6 +59,7 @@ if ($ids) {
     echo tableOfTickets(db_query($sql), true);
     ?>
         <input type="hidden" name="action" value="CLOSE" />
+        <input type="checkbox" class="checkall" />
         <button type="submit">Fermer les tickets sélectionnés</button>
     </form>
 
