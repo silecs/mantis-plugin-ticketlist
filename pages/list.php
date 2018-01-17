@@ -66,7 +66,7 @@ if ($ids) {
     <h2>Non validés</h2>
     <?php
     $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
-        . "WHERE b.id in (" . join(',', $ids) . ") AND b.status <> 85"
+        . "WHERE b.id in (" . join(',', $ids) . ") AND b.status NOT IN (85, 90)"
         . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
         . " ORDER BY b.id ASC";
     echo tableOfTickets(db_query($sql));
