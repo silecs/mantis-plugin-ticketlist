@@ -23,12 +23,16 @@ if (empty($_GET['ids'])) {
         exit();
     }
 }
+if (empty($_GET['title'])) {
+    $title = null;
+} else {
+    $title = $_GET['title'];
+}
 
-
-html_page_top();
+html_page_top($title ? "tickets $title" : "tickets list");
 ?>
 <h1>
-    Liste de tickets
+    Liste de tickets <?= $title ? htmlspecialchars($title) : '' ?>
 </h1>
 
 <div>
