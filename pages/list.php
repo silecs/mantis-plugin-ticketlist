@@ -35,7 +35,18 @@ html_page_top($title ? "tickets $title" : "tickets list");
     Liste de tickets <?= $title ? htmlspecialchars($title) : '' ?>
 </h1>
 
-<div>
+<div class="blocks-container">
+
+<div class="block">
+    <?php
+    if ($ids) {
+        ?>
+        <p>
+            <a href="<?= plugin_page('list') ?>&amp;ids=<?= join(',', $ids) ?>">lien vers cette page</a>
+        </p>
+        <?php
+    }
+    ?>
     <form action="<?= plugin_page('list') ?>" method="get">
         <p>
             <input type="hidden" name="page" value="TicketList/list" />
@@ -49,42 +60,48 @@ html_page_top($title ? "tickets $title" : "tickets list");
 <?php
 if ($ids) {
     ?>
-    <p>
-        <a href="<?= plugin_page('list') ?>&amp;ids=<?= join(',', $ids) ?>">lien vers cette page</a>
-    </p>
+    <section class="block">
+        <h2>Tickets listés</h2>
+        <form method="post" action="bug_actiongroup_page.php">
+        <?php
+        $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
+            . " WHERE b.id in (" . join(',', $ids) . ")"
+            . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+            . " ORDER BY b.id ASC";
+        echo tableOfTickets(db_query($sql), true);
+        ?>
+            <input type="hidden" name="action" value="CLOSE" />
+            <input type="checkbox" class="checkall" />
+            <button type="submit">Fermer les tickets sélectionnés</button>
+        </form>
+    </section>
 
-    <h2>Tickets listés</h2>
-    <form method="post" action="bug_actiongroup_page.php">
-    <?php
-    $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
-        . " WHERE b.id in (" . join(',', $ids) . ")"
-        . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-        . " ORDER BY b.id ASC";
-    echo tableOfTickets(db_query($sql), true);
-    ?>
-        <input type="hidden" name="action" value="CLOSE" />
-        <input type="checkbox" class="checkall" />
-        <button type="submit">Fermer les tickets sélectionnés</button>
-    </form>
+    <section class="block">
+        <h2>Non validés</h2>
+        <?php
+        $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
+            . "WHERE b.id in (" . join(',', $ids) . ") AND b.status NOT IN (85, 90)"
+            . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+            . " ORDER BY b.id ASC";
+        echo tableOfTickets(db_query($sql));
+        ?>
+    </section>
 
-    <h2>Non validés</h2>
+    <section class="block">
+        <h2>Non finis</h2>
+        <?php
+        $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
+            . "WHERE b.id in (" . join(',', $ids) . ") AND b.status < 80"
+            . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+            . " ORDER BY b.id ASC";
+        echo tableOfTickets(db_query($sql));
+        ?>
+    </section>
     <?php
-    $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
-        . "WHERE b.id in (" . join(',', $ids) . ") AND b.status NOT IN (85, 90)"
-        . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-        . " ORDER BY b.id ASC";
-    echo tableOfTickets(db_query($sql));
-    ?>
-
-    <h2>Non finis</h2>
-    <?php
-    $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
-        . "WHERE b.id in (" . join(',', $ids) . ") AND b.status < 80"
-        . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-        . " ORDER BY b.id ASC";
-    echo tableOfTickets(db_query($sql));
 }
 ?>
+
+</div>
 
 <?php
 html_page_bottom();
