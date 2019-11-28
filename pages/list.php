@@ -37,7 +37,8 @@ html_page_top($title ? "tickets $title" : "tickets list");
 
 <div class="blocks-container">
 
-<div class="block">
+<section class="block">
+    <h2>Sélection</h2>
     <?php
     if ($ids) {
         ?>
@@ -55,7 +56,7 @@ html_page_top($title ? "tickets $title" : "tickets list");
             <button type="submit">OK</button>
         </p>
     </form>
-</div>
+</section>
 
 <?php
 if ($ids) {
