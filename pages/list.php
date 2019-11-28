@@ -29,6 +29,10 @@ if (empty($_GET['title'])) {
     $title = $_GET['title'];
 }
 
+$sqlSort = empty($_GET['keeporder']) ?
+    " ORDER BY b.id ASC"
+    : " ORDER BY find_in_set(b.id, '" . join(",", $ids) . "') ASC";
+
 html_page_top($title ? "tickets $title" : "tickets list");
 ?>
 <h1>
@@ -68,7 +72,7 @@ if ($ids) {
         $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
             . " WHERE b.id in (" . join(',', $ids) . ")"
             . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-            . " ORDER BY b.id ASC";
+            . $sqlSort;
         echo tableOfTickets(db_query($sql), true);
         ?>
             <input type="hidden" name="action" value="CLOSE" />
@@ -83,7 +87,7 @@ if ($ids) {
         $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
             . "WHERE b.id in (" . join(',', $ids) . ") AND b.status NOT IN (85, 90)"
             . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-            . " ORDER BY b.id ASC";
+            . $sqlSort;
         echo tableOfTickets(db_query($sql));
         ?>
     </section>
@@ -94,7 +98,7 @@ if ($ids) {
         $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
             . "WHERE b.id in (" . join(',', $ids) . ") AND b.status < 80"
             . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-            . " ORDER BY b.id ASC";
+            . $sqlSort;
         echo tableOfTickets(db_query($sql));
         ?>
     </section>
