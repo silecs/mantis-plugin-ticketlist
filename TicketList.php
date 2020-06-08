@@ -67,16 +67,19 @@ class TicketListPlugin extends MantisPlugin
         return <<<EOJS
 <script type="text/javascript" nonce="{$this->nonce}">
 window.addEventListener('load', function() {
-    document.querySelector('input.checkall').addEventListener(
-        'click',
-        function(e) {
-            e.target.parentNode
-                .querySelectorAll('input[type=checkbox][value]')
-                .forEach(function(c) {
-                    c.click();
-                });
-        }
-    );
+    var ca = document.querySelector('input.checkall')
+    if (ca !== null) {
+        ca.addEventListener(
+            'click',
+            function(e) {
+                e.target.parentNode
+                    .querySelectorAll('input[type=checkbox][value]')
+                    .forEach(function(c) {
+                        c.click();
+                    });
+            }
+        );
+    }
 });
 </script>
 EOJS
