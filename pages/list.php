@@ -66,19 +66,30 @@ html_page_top($title ? "tickets $title" : "tickets list");
 if ($ids) {
     ?>
     <section class="block">
-        <h2>Tickets listés</h2>
+        <h2>Tickets listés (<?= count($ids) ?>)</h2>
         <form method="post" action="bug_actiongroup_page.php">
-        <?php
-        $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
-            . " WHERE b.id in (" . join(',', $ids) . ")"
-            . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-            . $sqlSort;
-        echo tableOfTickets(db_query($sql), true);
-        ?>
+            <?php
+            $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
+                . " WHERE b.id in (" . join(',', $ids) . ")"
+                . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+                . $sqlSort;
+            echo tableOfTickets(db_query($sql), true);
+            ?>
             <input type="hidden" name="action" value="CLOSE" />
             <input type="checkbox" class="checkall" />
             <button type="submit">Fermer les tickets sélectionnés</button>
         </form>
+        <?php
+        $sql = "SELECT sum(time_tracking) AS totaltime FROM bugnote WHERE bug_id IN (" . join(',', $ids) . ")";
+        $totaltime = (int) db_result(db_query($sql));
+        if ((int) helper_get_current_project() === 28) {
+            $totaltimeSinceUpgrade = (int) db_result(db_query($sql . " AND date_submitted > (SELECT MAX(date_submitted) FROM bugnote WHERE bug_id = 1875)"));
+        }
+        ?>
+        <div>
+            Temps total consacré à ces tickets : <strong><?= db_minutes_to_hhmm($totaltime) ?></strong>
+            <?= isset($totaltimeSinceUpgrade) ? " dont <strong>" . db_minutes_to_hhmm($totaltimeSinceUpgrade) . "</strong> depuis la dernière note dans #1875 (montée de version)" : "" ?>
+        </div>
     </section>
 
     <section class="block">
