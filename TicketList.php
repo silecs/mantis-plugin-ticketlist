@@ -38,7 +38,7 @@ class TicketListPlugin extends MantisPlugin
     {
         return [
             'EVENT_CORE_HEADERS' => 'csp_headers',
-            'EVENT_MENU_SUMMARY' => 'onMenuSummary',
+            'EVENT_MENU_MAIN' => 'onMenu',
             'EVENT_LAYOUT_RESOURCES' => 'loadJs',
         ];
     }
@@ -55,10 +55,15 @@ class TicketListPlugin extends MantisPlugin
      *
      * @return array
      */
-    public function onMenuSummary()
+    public function onMenu()
     {
         return [
-            '<a href="' . plugin_page('list') . '">Lister des tickets</a>',
+            [
+                'title' => "Lister des tickets",
+                'url' => plugin_page('list'),
+                'access_level' => ANYBODY,
+                'icon' => 'fa-list'
+            ],
         ];
     }
 
