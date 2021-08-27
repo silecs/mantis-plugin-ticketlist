@@ -19,7 +19,7 @@ class TicketListPlugin extends MantisPlugin
 
         $this->version = '1.0';
         $this->requires = [
-            'MantisCore' => '1.3.0, < 2.0',
+            'MantisCore' => '2.0.0',
         ];
 
         $this->author = 'François Gannaz / Silecs';

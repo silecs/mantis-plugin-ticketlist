@@ -33,8 +33,10 @@ $sqlSort = empty($_GET['keeporder']) ?
     " ORDER BY b.id ASC"
     : " ORDER BY find_in_set(b.id, '" . join(",", $ids) . "') ASC";
 
-html_page_top($title ? "tickets $title" : "tickets list");
+layout_page_header($title ? "tickets $title" : "tickets list");
+layout_page_begin();
 ?>
+<link rel="stylesheet" type="text/css" href="<?php echo plugin_file( 'ticketlist.css' ) ?>" />
 <h1>
     Liste de tickets <?= $title ? htmlspecialchars($title) : '' ?>
 </h1>
@@ -120,28 +122,30 @@ if ($ids) {
 </div>
 
 <?php
-html_page_bottom();
+layout_page_end();
 
 function tableOfTickets($rows, $selectable = false) {
     if (db_num_rows($rows) === 0) {
         return "<p>Aucun.</p>";
     }
-    $html = "
-<table>
+    $htmlSel = ($selectable ? "<th></th>" : "");
+    $html = <<<"EOHTML"
+<table class="buglist table table-bordered table-condensed table-hover">
     <thead>
-        <tr>" . ($selectable ? "<th></th>" : "") . "
+        <tr>
+            $htmlSel
             <th>ID</th>
             <th>status</th>
             <th>summary</th>
         </tr>
     </thead>
     <tbody>
-";
+EOHTML;
     foreach ($rows as $row) {
-        $html .= "<tr>"
+        $html .= '<tr class="status-' . $row['status'] . '-bg">'
             . ($selectable ? '<td><input type="checkbox" name="bug_arr[]" value="' . (int) $row['id'] . '"></td>' : "")
             . "<td>" . string_get_bug_view_link($row['id'], null, false) . "</td>"
-            . '<td bgcolor="' . get_status_color($row['status']) . '">' . get_enum_element('status', $row['status']) . "</td>"
+            . '<td>' . get_enum_element('status', $row['status']) . "</td>"
             . "<td>" . string_display($row['summary']) . "</td>"
             . "</tr>";
     }
