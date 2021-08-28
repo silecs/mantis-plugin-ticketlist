@@ -17,7 +17,7 @@ class TicketListPlugin extends MantisPlugin
         $this->description = "Plugin that displays the state of a list of tickets.";
         $this->page = 'list';
 
-        $this->version = '1.0';
+        $this->version = '2.0';
         $this->requires = [
             'MantisCore' => '2.0.0',
         ];
@@ -37,17 +37,18 @@ class TicketListPlugin extends MantisPlugin
     public function hooks()
     {
         return [
-            'EVENT_CORE_HEADERS' => 'csp_headers',
+            'EVENT_CORE_HEADERS' => 'addHttpHeaders',
             'EVENT_MENU_MAIN' => 'onMenu',
-            'EVENT_LAYOUT_RESOURCES' => 'loadJs',
+            'EVENT_LAYOUT_RESOURCES' => 'addHtmlHeadContent',
         ];
     }
 
     /**
      * Add Content Security Policy headers for our script.
      */
-    function csp_headers() {
-        http_csp_add( 'script-src', "'nonce-{$this->nonce}'" );
+    function addHttpHeaders()
+    {
+        http_csp_add('script-src', "'nonce-{$this->nonce}'");
     }
 
     /**
@@ -67,9 +68,11 @@ class TicketListPlugin extends MantisPlugin
         ];
     }
 
-    public function loadJs()
+    function addHtmlHeadContent()
     {
-        return <<<EOJS
+        $page = plugin_file( 'ticketlist.css' );
+        return <<<EOHTML
+<link rel="stylesheet" type="text/css" href="{$page}" />
 <script type="text/javascript" nonce="{$this->nonce}">
 window.addEventListener('load', function() {
     var ca = document.querySelector('input.checkall')
@@ -87,7 +90,7 @@ window.addEventListener('load', function() {
     }
 });
 </script>
-EOJS
+EOHTML
         ;
     }
 }

@@ -5,5 +5,9 @@
 }
 .block {
     flex: auto;
-    padding: 0 1ex;
+    border: thin solid black;
+    margin: 1ex;
+}
+#select-tickets {
+    max-width: 50ex;
 }

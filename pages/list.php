@@ -6,114 +6,123 @@
 access_ensure_project_level(config_get('view_summary_threshold'));
 
 $projectId = helper_get_current_project();
-$isAdmin = (boolean) access_has_global_level(config_get('manage_site_threshold'));
+$isAdmin = (bool) access_has_global_level(config_get('manage_site_threshold'));
 
-if (empty($_GET['ids'])) {
-    $ids = [];
-} else {
-    $ids = array_filter(
-        array_map(
-            function($id) { return (int) preg_replace('/^\D*/', '', $id); },
-            preg_split('/[,\n\s]+/', $_GET['ids'])
-        )
-    );
-    // redirect to a cleaner URL
-    if ($ids && strpos($_GET['ids'], "\n") !== false) {
-        header("Location: " . plugin_page('list') . '&ids=' . join(',', $ids));
-        exit();
-    }
-}
-if (empty($_GET['title'])) {
-    $title = null;
-} else {
-    $title = $_GET['title'];
+$data = parseQueryParameters($_GET ?? []);
+
+// redirect to a cleaner URL
+if ($data['ids'] && strpos($_GET['ids'], "\n") !== false) {
+    $url = plugin_page('list')
+        . '&ids=' . join(',', $data['ids'])
+        . ($data['title'] ? "&title=" . rawurlencode($data['title']) : "")
+        . ($data['keepOrder'] ? "&keeporder=1" : "");
+    header("Location: $url");
+    exit();
 }
 
-$sqlSort = empty($_GET['keeporder']) ?
-    " ORDER BY b.id ASC"
-    : " ORDER BY find_in_set(b.id, '" . join(",", $ids) . "') ASC";
+$sqlSort = $data['keepOrder'] ?
+    " ORDER BY find_in_set(b.id, '" . join(",", $data['ids']) . "') ASC"
+    : " ORDER BY b.id ASC";
 
-layout_page_header($title ? "tickets $title" : "tickets list");
+layout_page_header($data['title'] ? "tickets {$data['title']}" : "tickets list");
 layout_page_begin();
 ?>
-<link rel="stylesheet" type="text/css" href="<?php echo plugin_file( 'ticketlist.css' ) ?>" />
 <h1>
-    Liste de tickets <?= $title ? htmlspecialchars($title) : '' ?>
+    Liste de tickets <em><?= htmlspecialchars($data['title'] ?: '') ?></em>
 </h1>
 
 <div class="blocks-container">
 
-<section class="block">
-    <h2>Sélection</h2>
-    <?php
-    if ($ids) {
-        ?>
-        <p>
-            <a href="<?= plugin_page('list') ?>&amp;ids=<?= join(',', $ids) ?>">lien vers cette page</a>
-        </p>
-        <?php
-    }
-    ?>
-    <form action="<?= plugin_page('list') ?>" method="get">
-        <p>
+<section class="widget-box widget-color-blue2 block" id="select-tickets">
+    <div class="widget-header widget-header-small">
+        <h2>Sélection</h2>
+    </div>
+    <div class="widget-body widget-main">
+        <form action="<?= plugin_page('list') ?>" method="get" class="form">
             <input type="hidden" name="page" value="TicketList/list" />
-            <label>Tickets #</label><br />
-            <textarea name="ids" cols="10" rows="20"><?= htmlspecialchars(join("\n", $ids)); ?></textarea>
-            <button type="submit">OK</button>
-        </p>
-    </form>
+            <div class="form-group">
+                <label class="control-label">Tickets #</label>
+                <textarea class="form-control" name="ids" cols="10" rows="20" placeholder="un numéro par ligne"><?= htmlspecialchars(join("\n", $data['ids'])); ?></textarea>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Titre de la liste</label>
+                <input class="form-control" type="text" name="title" value="<?= htmlspecialchars($data['title']) ?>" />
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="keeporder" value="1" <?= $data['keepOrder'] ? 'checked="checked"' : "" ?> />
+                    Conserver l'ordre des tickets
+                </label>
+            </div>
+            <button type="submit" class="btn btn-default">OK</button>
+        </form>
+    </div>
 </section>
 
 <?php
-if ($ids) {
+if ($data['ids']) {
     ?>
-    <section class="block">
-        <h2>Tickets listés (<?= count($ids) ?>)</h2>
-        <form method="post" action="bug_actiongroup_page.php">
+    <section class="widget-box block">
+        <div class="widget-header widget-header-small">
+            <h2>Tickets listés (<?= count($data['ids']) ?>)</h2>
+        </div>
+        <div class="widget-body widget-main">
+            <form method="post" action="bug_actiongroup_page.php">
+                <?php
+                $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
+                    . " WHERE b.id in (" . join(',', $data['ids']) . ")"
+                    . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+                    . $sqlSort;
+                echo tableOfTickets(db_query($sql), $isAdmin);
+                ?>
+                <?php if ($isAdmin) { ?>
+                <input type="hidden" name="action" value="CLOSE" />
+                <input type="checkbox" class="checkall" />
+                <button type="submit">Fermer les tickets sélectionnés</button>
+                <?php } ?>
+            </form>
             <?php
-            $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
-                . " WHERE b.id in (" . join(',', $ids) . ")"
-                . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-                . $sqlSort;
-            echo tableOfTickets(db_query($sql), true);
+            $sql = "SELECT sum(time_tracking) AS totaltime FROM bugnote WHERE bug_id IN (" . join(',', $data['ids']) . ")";
+            $totaltime = (int) db_result(db_query($sql));
+            if ((int) helper_get_current_project() === 28) {
+                $totaltimeSinceUpgrade = (int) db_result(db_query($sql . " AND date_submitted > (SELECT MAX(date_submitted) FROM bugnote WHERE bug_id = 1875)"));
+            }
             ?>
-            <input type="hidden" name="action" value="CLOSE" />
-            <input type="checkbox" class="checkall" />
-            <button type="submit">Fermer les tickets sélectionnés</button>
-        </form>
-        <?php
-        $sql = "SELECT sum(time_tracking) AS totaltime FROM bugnote WHERE bug_id IN (" . join(',', $ids) . ")";
-        $totaltime = (int) db_result(db_query($sql));
-        if ((int) helper_get_current_project() === 28) {
-            $totaltimeSinceUpgrade = (int) db_result(db_query($sql . " AND date_submitted > (SELECT MAX(date_submitted) FROM bugnote WHERE bug_id = 1875)"));
-        }
-        ?>
-        <div>
+        </div>
+        <div class="widget-toolbox padding-8" style="margin-top: 2em">
             Temps total consacré à ces tickets : <strong><?= db_minutes_to_hhmm($totaltime) ?></strong>
-            <?= isset($totaltimeSinceUpgrade) ? " dont <strong>" . db_minutes_to_hhmm($totaltimeSinceUpgrade) . "</strong> depuis la dernière note dans #1875 (montée de version)" : "" ?>
+            <?= $totaltime && isset($totaltimeSinceUpgrade) ? " dont <strong>" . db_minutes_to_hhmm($totaltimeSinceUpgrade) . "</strong> depuis la dernière note dans #1875 (montée de version)" : "" ?>
         </div>
     </section>
 
-    <section class="block">
-        <h2>Non validés</h2>
-        <?php
-        $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
-            . "WHERE b.id in (" . join(',', $ids) . ") AND b.status NOT IN (85, 90)"
-            . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-            . $sqlSort;
-        echo tableOfTickets(db_query($sql));
-        ?>
+    <section class="widget-box block">
+        <div class="widget-header widget-header-small">
+            <h2>Non validés</h2>
+        </div>
+        <div class="widget-body widget-main">
+            <?php
+            $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
+                . "WHERE b.id in (" . join(',', $data['ids']) . ") AND b.status NOT IN (85, 90)"
+                . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+                . $sqlSort;
+            echo tableOfTickets(db_query($sql));
+            ?>
+        </div>
     </section>
 
-    <section class="block">
-        <h2>Non finis</h2>
-        <?php
-        $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
-            . "WHERE b.id in (" . join(',', $ids) . ") AND b.status < 80"
-            . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
-            . $sqlSort;
-        echo tableOfTickets(db_query($sql));
-        ?>
+    <section class="widget-box block">
+        <div class="widget-header widget-header-small">
+            <h2>Non finis</h2>
+        </div>
+        <div class="widget-body widget-main">
+            <?php
+            $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
+                . "WHERE b.id in (" . join(',', $data['ids']) . ") AND b.status < 80"
+                . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+                . $sqlSort;
+            echo tableOfTickets(db_query($sql));
+            ?>
+        </div>
     </section>
     <?php
 }
@@ -154,4 +163,24 @@ EOHTML;
 </table>
 ";
     return $html;
+}
+
+function parseQueryParameters(array $in): array
+{
+    if (empty($in['ids'])) {
+        $ids = [];
+    } else {
+        $ids = array_filter(
+            array_map(
+                function($id) { return (int) preg_replace('/^\D*/', '', $id); },
+                preg_split('/[,\n\s]+/', $in['ids'])
+            )
+        );
+    }
+
+    return [
+        'ids' => $ids,
+        'title' => $in['title'] ?? "",
+        'keepOrder' => !empty($in['keeporder']),
+    ];
 }
