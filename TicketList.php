@@ -9,6 +9,11 @@
 class TicketListPlugin extends MantisPlugin
 {
     /**
+     * @var string
+     */
+    public $nonce;
+
+    /**
      * Init the plugin attributes.
      */
     function register()
@@ -46,17 +51,15 @@ class TicketListPlugin extends MantisPlugin
     /**
      * Add Content Security Policy headers for our script.
      */
-    function addHttpHeaders()
+    function addHttpHeaders(): void
     {
         http_csp_add('script-src', "'nonce-{$this->nonce}'");
     }
 
     /**
      * Add entries to the menu on the page "Summary".
-     *
-     * @return array
      */
-    public function onMenu()
+    public function onMenu(): array
     {
         return [
             [
@@ -68,26 +71,31 @@ class TicketListPlugin extends MantisPlugin
         ];
     }
 
-    function addHtmlHeadContent()
+    function addHtmlHeadContent(): string
     {
-        $page = plugin_file( 'ticketlist.css' );
+        $page = $_GET['page'] ?? '';
+        if ($page !== 'TicketList/list') {
+            return '';
+        }
+        $cssPath = plugin_file('ticketlist.css');
         return <<<EOHTML
-<link rel="stylesheet" type="text/css" href="{$page}" />
+<link rel="stylesheet" type="text/css" href="{$cssPath}" />
 <script type="text/javascript" nonce="{$this->nonce}">
 window.addEventListener('load', function() {
     var ca = document.querySelector('input.checkall')
-    if (ca !== null) {
-        ca.addEventListener(
-            'click',
-            function(e) {
-                e.target.parentNode
-                    .querySelectorAll('input[type=checkbox][value]')
-                    .forEach(function(c) {
-                        c.click();
-                    });
-            }
-        );
+    if (ca === null) {
+        return;
     }
+    ca.addEventListener(
+        'click',
+        function(e) {
+            e.target.parentNode
+                .querySelectorAll('input[type=checkbox][value]')
+                .forEach(function(c) {
+                    c.click();
+                });
+        }
+    );
 });
 </script>
 EOHTML
