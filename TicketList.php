@@ -16,7 +16,7 @@ class TicketListPlugin extends MantisPlugin
     /**
      * Init the plugin attributes.
      */
-    function register()
+    public function register()
     {
         $this->name = 'Ticket List';
         $this->description = "Plugin that displays the state of a list of tickets.";
@@ -41,19 +41,20 @@ class TicketListPlugin extends MantisPlugin
      */
     public function hooks()
     {
+        // Event hooks must be public methods of this plugin object.
+        // They will be called from an external function.
         return [
-            'EVENT_CORE_HEADERS' => 'addHttpHeaders',
+            'EVENT_CORE_HEADERS' => 'onBeforeOutput',
             'EVENT_MENU_MAIN' => 'onMenu',
             'EVENT_LAYOUT_RESOURCES' => 'addHtmlHeadContent',
         ];
     }
 
-    /**
-     * Add Content Security Policy headers for our script.
-     */
-    function addHttpHeaders(): void
+    public function onBeforeOutput(): void
     {
-        http_csp_add('script-src', "'nonce-{$this->nonce}'");
+        if ($this->isPluginRequested("list")) {
+            $this->addHttpHeaders();
+        }
     }
 
     /**
@@ -71,10 +72,9 @@ class TicketListPlugin extends MantisPlugin
         ];
     }
 
-    function addHtmlHeadContent(): string
+    public function addHtmlHeadContent(): string
     {
-        $page = $_GET['page'] ?? '';
-        if ($page !== 'TicketList/list') {
+        if (!$this->isPluginRequested("list")) {
             return '';
         }
         $cssPath = plugin_file('ticketlist.css');
@@ -100,5 +100,26 @@ window.addEventListener('load', function() {
 </script>
 EOHTML
         ;
+    }
+
+    /**
+     * Add Content Security Policy headers for our script.
+     */
+    private function addHttpHeaders(): void
+    {
+        http_csp_add('script-src', "'nonce-{$this->nonce}'");
+    }
+
+    private function isPluginRequested(string $page = ''): bool
+    {
+        if (strpos($_SERVER['REQUEST_URI'], "plugin.php") === false) {
+            return false;
+        }
+        $pageRequested = $_GET['page'] ?? '';
+        if ($page) {
+            return ($pageRequested === "TicketList/$page");
+        } else {
+            return (strncmp($page, 'TicketList', 10) === 0);
+        }
     }
 }
