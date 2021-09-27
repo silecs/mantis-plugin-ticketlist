@@ -1,7 +1,4 @@
 <?php
-/*
- * @license http://www.gnu.org/licenses/gpl-3.0.html  GNU GPL v3
- */
 
 access_ensure_project_level(config_get('view_summary_threshold'));
 
@@ -67,7 +64,8 @@ if ($data['ids']) {
             <h2>Tickets listés (<?= count($data['ids']) ?>)</h2>
         </div>
         <div class="widget-body widget-main">
-            <form method="post" action="bug_actiongroup_page.php">
+            <form method="get" action="plugin.php">
+                <input type="hidden" name="page" value="TicketList/close" />
                 <?php
                 $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
                     . " WHERE b.id in (" . join(',', $data['ids']) . ")"
@@ -76,7 +74,6 @@ if ($data['ids']) {
                 echo tableOfTickets(db_query($sql), $isAdmin);
                 ?>
                 <?php if ($isAdmin) { ?>
-                <input type="hidden" name="action" value="CLOSE" />
                 <input type="checkbox" class="checkall" />
                 <button type="submit">Fermer les tickets sélectionnés</button>
                 <?php } ?>
@@ -152,7 +149,7 @@ function tableOfTickets($rows, $selectable = false) {
 EOHTML;
     foreach ($rows as $row) {
         $html .= '<tr class="status-' . $row['status'] . '-bg">'
-            . ($selectable ? '<td><input type="checkbox" name="bug_arr[]" value="' . (int) $row['id'] . '"></td>' : "")
+            . ($selectable ? '<td><input type="checkbox" name="ids[]" value="' . (int) $row['id'] . '"></td>' : "")
             . "<td>" . string_get_bug_view_link($row['id'], null, false) . "</td>"
             . '<td>' . get_enum_element('status', $row['status']) . "</td>"
             . "<td>" . string_display($row['summary']) . "</td>"
