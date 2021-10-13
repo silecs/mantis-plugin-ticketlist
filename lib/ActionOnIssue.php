@@ -44,7 +44,7 @@ class ActionOnIssue
     {
         $this->lastFailure = '';
         $this->fixGlobalState($bug);
-        return $this->close($bug) && $this->updateFixedInVersion($bug) && $this->notify($bug);
+        return $this->updateFixedInVersion($bug) && $this->close($bug);
     }
 
     public function getLastFailure(): string
