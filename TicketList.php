@@ -22,7 +22,7 @@ class TicketListPlugin extends MantisPlugin
         $this->description = "Plugin that displays the state of a list of tickets.";
         $this->page = 'list';
 
-        $this->version = '2.0';
+        $this->version = '2.1';
         $this->requires = [
             'MantisCore' => '2.0.0',
         ];
@@ -96,10 +96,40 @@ window.addEventListener('load', function() {
                 });
         }
     );
+    document.getElementById('publish').addEventListener(
+        'click',
+        function(e) {
+            this.closest('form').setAttribute('method', 'post');
+        }
+    );
 });
 </script>
 EOHTML
         ;
+    }
+
+    /**
+     * Undocumented method that defines the SQL schema of new tables.
+     */
+    public function schema() {
+        return [
+            // operations
+            [
+                // first operation
+                'CreateTableSQL',
+                [
+                    plugin_table('persistent'), // the table name
+                    <<<EOTEXT
+                    id                 I       NOTNULL UNSIGNED AUTOINCREMENT PRIMARY,
+                    project_id         I       DEFAULT NULL UNSIGNED,
+                    name               C(255)  NOTNULL DEFAULT '',
+                    ids                C(255)  NOTNULL DEFAULT '',
+                    author_id          I       DEFAULT NULL UNSIGNED,
+                    last_update        T
+                    EOTEXT
+                ]
+            ],
+        ];
     }
 
     /**

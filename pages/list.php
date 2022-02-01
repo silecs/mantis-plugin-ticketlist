@@ -2,13 +2,24 @@
 
 access_ensure_project_level(config_get('view_summary_threshold'));
 
-$projectId = helper_get_current_project();
+$projectId = (int) helper_get_current_project();
 $isAdmin = (bool) access_has_global_level(config_get('manage_site_threshold'));
 
-$data = parseQueryParameters($_GET ?? []);
+$refresh = false;
+require_once dirname(__DIR__) . '/lib/Persistent.php';
+if (!empty($_POST['title']) && !empty($_POST['ids'])) {
+    $data = parseQueryParameters($_POST ?? []);
+    Persistent::save($data['title'], join("\n", $data['ids']));
+    $refresh = true;
+} else {
+    $data = parseQueryParameters($_GET ?? []);
+    if ($data['ids'] && strpos($_GET['ids'], "\n") !== false) {
+        $refresh = true;
+    }
+}
 
 // redirect to a cleaner URL
-if ($data['ids'] && strpos($_GET['ids'], "\n") !== false) {
+if ($refresh) {
     $url = plugin_page('list')
         . '&ids=' . join(',', $data['ids'])
         . ($data['title'] ? "&title=" . rawurlencode($data['title']) : "")
@@ -16,6 +27,8 @@ if ($data['ids'] && strpos($_GET['ids'], "\n") !== false) {
     header("Location: $url");
     exit();
 }
+
+$persistentLists = Persistent::getNames($projectId);
 
 $sqlSort = $data['keepOrder'] ?
     " ORDER BY find_in_set(b.id, '" . join(",", $data['ids']) . "') ASC"
@@ -27,6 +40,17 @@ layout_page_begin();
 <h1>
     Liste de tickets <em><?= htmlspecialchars($data['title'] ?: '') ?></em>
 </h1>
+
+<?php
+if ($persistentLists) {
+    echo '<ul class="persistent-lists">';
+    foreach ($persistentLists as $id => [$name, $time]) {
+        $date = date("Y-m-d H:i", $time);
+        echo '<li><a href="">' . htmlspecialchars($name) . "</a> [$date]</li>";
+    }
+    echo "</ul>\n";
+}
+?>
 
 <div class="blocks-container">
 
@@ -51,7 +75,8 @@ layout_page_begin();
                     Conserver l'ordre des tickets
                 </label>
             </div>
-            <button type="submit" class="btn btn-default">OK</button>
+            <button type="submit" class="btn btn-primary">OK</button>
+            <button type="submit" class="btn btn-default" id="publish" value="1">Publier</button>
         </form>
     </div>
 </section>
@@ -69,7 +94,7 @@ if ($data['ids']) {
                 <?php
                 $sql = "SELECT b.id, b.status, b.summary FROM {bug} b"
                     . " WHERE b.id in (" . join(',', $data['ids']) . ")"
-                    . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+                    . ($isAdmin ? "" : " AND b.project_id = $projectId")
                     . $sqlSort;
                 echo tableOfTickets(db_query($sql), $isAdmin);
                 ?>
@@ -81,7 +106,7 @@ if ($data['ids']) {
             <?php
             $sql = "SELECT sum(time_tracking) AS totaltime FROM bugnote WHERE bug_id IN (" . join(',', $data['ids']) . ")";
             $totaltime = (int) db_result(db_query($sql));
-            if ((int) helper_get_current_project() === 28) {
+            if ($projectId === 28) {
                 $totaltimeSinceUpgrade = (int) db_result(db_query($sql . " AND date_submitted > (SELECT MAX(date_submitted) FROM bugnote WHERE bug_id = 1875)"));
             }
             ?>
@@ -100,7 +125,7 @@ if ($data['ids']) {
             <?php
             $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
                 . "WHERE b.id in (" . join(',', $data['ids']) . ") AND b.status NOT IN (85, 90)"
-                . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+                . ($isAdmin ? "" : " AND b.project_id = $projectId")
                 . $sqlSort;
             echo tableOfTickets(db_query($sql));
             ?>
@@ -115,7 +140,7 @@ if ($data['ids']) {
             <?php
             $sql = "SELECT b.id, b.status, b.summary FROM {bug} b "
                 . "WHERE b.id in (" . join(',', $data['ids']) . ") AND b.status < 80"
-                . ($isAdmin ? "" : " AND b.project_id = " . (int) $projectId)
+                . ($isAdmin ? "" : " AND b.project_id = $projectId")
                 . $sqlSort;
             echo tableOfTickets(db_query($sql));
             ?>
@@ -170,14 +195,14 @@ function parseQueryParameters(array $in): array
         $ids = array_filter(
             array_map(
                 function($id) { return (int) preg_replace('/^\D*/', '', $id); },
-                preg_split('/[,\n\s]+/', $in['ids'])
+                preg_split('/[,\n\s]+/', (string) $in['ids'])
             )
         );
     }
 
     return [
         'ids' => $ids,
-        'title' => $in['title'] ?? "",
+        'title' => (string) ($in['title'] ?? ""),
         'keepOrder' => !empty($in['keeporder']),
     ];
 }
