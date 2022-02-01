@@ -5,6 +5,14 @@ require_api('authentication_api.php'); // auth_* functions
 
 class Persistent
 {
+    public static function find(int $id): array
+    {
+        $tableName = plugin_table('persistent');
+        $sql = sprintf("SELECT * FROM {$tableName} WHERE id = $id");
+        $it = db_query($sql);
+        return db_fetch_array($it);
+    }
+
     public static function getNames(int $projectId): array
     {
         if (!$projectId) {
@@ -22,6 +30,8 @@ class Persistent
 
     public static function save(string $name, string $ids): void
     {
+        db_query("CREATE UNIQUE INDEX IF NOT EXISTS persistent_name_u ON plugin_TicketList_persistent (name)");
+
         $tableName = plugin_table('persistent');
         $projectId = (int) helper_get_current_project();
         $authorId = (int) auth_get_current_user_id();

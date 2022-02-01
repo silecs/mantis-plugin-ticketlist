@@ -9,7 +9,7 @@ $refresh = false;
 require_once dirname(__DIR__) . '/lib/Persistent.php';
 if (!empty($_POST['title']) && !empty($_POST['ids'])) {
     $data = parseQueryParameters($_POST ?? []);
-    Persistent::save($data['title'], join("\n", $data['ids']));
+    Persistent::save($data['title'], join(",", $data['ids']));
     $refresh = true;
 } else {
     $data = parseQueryParameters($_GET ?? []);
@@ -46,7 +46,8 @@ if ($persistentLists) {
     echo '<ul class="persistent-lists">';
     foreach ($persistentLists as $id => [$name, $time]) {
         $date = date("Y-m-d H:i", $time);
-        echo '<li><a href="">' . htmlspecialchars($name) . "</a> [$date]</li>";
+        $url = $url = plugin_page('load') . "&id=$id";
+        echo '<li><a href="' . htmlspecialchars($url) . '">' . htmlspecialchars($name) . "</a> [$date]</li>";
     }
     echo "</ul>\n";
 }
