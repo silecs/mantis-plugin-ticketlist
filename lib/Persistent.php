@@ -28,14 +28,27 @@ class Persistent
         return $result;
     }
 
+    public static function delete(string $name): void
+    {
+        $tableName = plugin_table('persistent');
+        $projectId = (int) helper_get_current_project();
+        $sql = "DELETE FROM {$tableName} WHERE project_id = {$projectId} AND `name` = " . db_param();
+        db_query($sql, [$name]);
+    }
+
     public static function save(string $name, string $ids): void
     {
-        db_query("CREATE UNIQUE INDEX IF NOT EXISTS persistent_name_u ON plugin_TicketList_persistent (name)");
+        db_query("CREATE UNIQUE INDEX IF NOT EXISTS persistent_name_u ON plugin_TicketList_persistent (`project_id`, `name`)");
 
         $tableName = plugin_table('persistent');
         $projectId = (int) helper_get_current_project();
         $authorId = (int) auth_get_current_user_id();
-        $sql = sprintf("REPLACE INTO {$tableName} VALUES (NULL, $projectId, %s, %s, $authorId, NOW())", db_param(), db_param());
+        $sql = sprintf(
+            "REPLACE INTO {$tableName} (project_id, `name`, ids, author_id, last_update)"
+                . " VALUES ($projectId, %s, %s, $authorId, NOW())",
+            db_param(),
+            db_param()
+        );
         db_query($sql, [$name, $ids]);
     }
 }

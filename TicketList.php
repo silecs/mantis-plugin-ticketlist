@@ -52,8 +52,13 @@ class TicketListPlugin extends MantisPlugin
 
     public function onBeforeOutput(): void
     {
+        global $g_bypass_headers;
         if ($this->isPluginRequested("list")) {
             $this->addHttpHeaders();
+        }
+        if ($this->isPluginRequested("save")) {
+            // Hidden global setting found by reverse engineering this junk of Mantis.
+            $g_bypass_headers = true;
         }
     }
 
@@ -77,35 +82,12 @@ class TicketListPlugin extends MantisPlugin
         if (!$this->isPluginRequested("list")) {
             return '';
         }
-        $cssPath = plugin_file('ticketlist.css');
+        $cssPath = htmlspecialchars(plugin_file('ticketlist.css'));
+        $jsPath = htmlspecialchars(plugin_file('ticketlist.js')); // json_encode(plugin_page('list'));
         return <<<EOHTML
-<link rel="stylesheet" type="text/css" href="{$cssPath}" />
-<script type="text/javascript" nonce="{$this->nonce}">
-window.addEventListener('load', function() {
-    var ca = document.querySelector('input.checkall')
-    if (ca === null) {
-        return;
-    }
-    ca.addEventListener(
-        'click',
-        function(e) {
-            e.target.parentNode
-                .querySelectorAll('input[type=checkbox][value]')
-                .forEach(function(c) {
-                    c.click();
-                });
-        }
-    );
-    document.getElementById('publish').addEventListener(
-        'click',
-        function(e) {
-            this.closest('form').setAttribute('method', 'post');
-        }
-    );
-});
-</script>
-EOHTML
-        ;
+            <link rel="stylesheet" type="text/css" href="{$cssPath}" />
+            <script src="{$jsPath}"></script>
+            EOHTML;
     }
 
     /**
@@ -137,7 +119,8 @@ EOHTML
      */
     private function addHttpHeaders(): void
     {
-        http_csp_add('script-src', "'nonce-{$this->nonce}'");
+        $hash = hash_file('sha256', __DIR__ . '/files/ticketlist.js');
+        http_csp_add('script-src', "'sha256-{$hash}'");
     }
 
     private function isPluginRequested(string $page = ''): bool

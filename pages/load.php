@@ -7,18 +7,25 @@ require_once dirname(__DIR__) . '/lib/Persistent.php';
 $id = (int) ($_GET['id'] ?? 0);
 if (!$id) {
     header("Location: " . plugin_page('list'));
-    exit();
+    return;
 }
 
 $data = Persistent::find($id);
 if (!$data) {
     header("Location: " . plugin_page('list'));
-    exit();
+    return;
 }
 
+// AJAX
+$accept = apache_request_headers()["Accept"] ?? '';
+if (strpos($accept, 'application/json') !== false) {
+    echo "true";
+    return;
+}
+
+// HTTP redirection to a HTML page
 $url = plugin_page('list')
     . '&ids=' . rawurlencode($data['ids'])
-    . ($data['title'] ? "&title=" . rawurlencode($data['title']) : "")
+    . ($data['name'] ? "&title=" . rawurlencode($data['name']) : "")
     . "&keeporder=1";
 header("Location: $url");
-exit();

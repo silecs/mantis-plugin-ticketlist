@@ -77,7 +77,7 @@ if ($persistentLists) {
                 </label>
             </div>
             <button type="submit" class="btn btn-primary">OK</button>
-            <button type="submit" class="btn btn-default" id="publish" value="1">Publier</button>
+            <button type="button" class="btn btn-default" id="publish">Publier</button>
         </form>
     </div>
 </section>
