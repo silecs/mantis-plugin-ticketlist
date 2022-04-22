@@ -1,6 +1,12 @@
 import m from "mithril"
 
-let content = []
+const emptyList = {
+    id: 0,
+    ids: "",
+    name: "",
+}
+
+let content = emptyList
 
 let loading = null
 
@@ -11,7 +17,7 @@ export default {
     isLoading() {
         return loading !== null;
     },
-    load(projectId) {
+    load(id) {
         if (loading !== null) {
             return loading;
         }
@@ -21,14 +27,14 @@ export default {
             params: {
                 page: "TicketList/api",
                 action: "list",
-                projectId,
+                id,
             },
             withCredentials: true,
         }).then(function(result) {
-            content = result ?? [];
+            content = result ?? emptyList;
             return content;
         }).catch(function() {
-            alert(`Erreur en lisant l'api /list (project ${projectId})`)
+            alert(`Erreur en lisant l'api /list/${id}`)
         }).finally(function() {
             loading = null;
         });

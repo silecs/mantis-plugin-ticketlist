@@ -29,13 +29,13 @@ export default {
             params: {
                 page: "TicketList/api",
                 action: "project",
-                id: id,
+                id,
             },
             withCredentials: true,
         }).then(function(result) {
             state.lists = result;
         }).catch(function() {
-            alert("Erreur en lisant /api/list/" + id)
+            alert(`Erreur en lisant l'api /project/${id}`)
         }).finally(function() {
             loading = null;
         });
