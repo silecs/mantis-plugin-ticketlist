@@ -1,7 +1,4 @@
 <?php
-/**
- * @license http://www.gnu.org/licenses/gpl-3.0.html  GNU GPL v3
- */
 
 /**
  * @author François Gannaz <francois.gannaz@silecs.info>
@@ -53,11 +50,11 @@ class TicketListPlugin extends MantisPlugin
     public function onBeforeOutput(): void
     {
         global $g_bypass_headers;
-        if ($this->isPluginRequested("list")) {
+        if ($this->isPluginRequested("index")) {
             $this->addHttpHeaders();
         }
-        if ($this->isPluginRequested("save")) {
-            // Hidden global setting found by reverse engineering this junk of Mantis.
+        if ($this->isPluginRequested("api")) {
+            // Hidden global setting, found by reverse engineering this junk of Mantis.
             $g_bypass_headers = true;
         }
     }
@@ -70,7 +67,7 @@ class TicketListPlugin extends MantisPlugin
         return [
             [
                 'title' => "Lister des tickets",
-                'url' => plugin_page('list'),
+                'url' => plugin_page('index'),
                 'access_level' => ANYBODY,
                 'icon' => 'fa-list'
             ],
@@ -79,13 +76,22 @@ class TicketListPlugin extends MantisPlugin
 
     public function addHtmlHeadContent(): string
     {
-        if (!$this->isPluginRequested("list")) {
+        if (!$this->isPluginRequested("index")) {
             return '';
         }
         $cssPath = htmlspecialchars(plugin_file('ticketlist.css'));
-        $jsPath = htmlspecialchars(plugin_file('ticketlist.js')); // json_encode(plugin_page('list'));
+        $jsPath = htmlspecialchars(plugin_file('main.js')); // json_encode(plugin_page('list'));
+        $projectId = (int) helper_get_current_project();
+        if ($projectId > 0) {
+            $record = project_get_row($projectId);
+            $project = ['id' => (int) $record['id'], 'name' => $record['name']];
+        } else {
+            $project = ['id' => 0, 'name' => "Tous les projets"];
+        }
+        $data = htmlspecialchars(json_encode($project), ENT_NOQUOTES);
         return <<<EOHTML
             <link rel="stylesheet" type="text/css" href="{$cssPath}" />
+            <script id="ticket-list-data" type="application/json">{$data}</script>
             <script src="{$jsPath}"></script>
             EOHTML;
     }
@@ -106,7 +112,9 @@ class TicketListPlugin extends MantisPlugin
                     project_id         I       DEFAULT NULL UNSIGNED,
                     name               C(255)  NOTNULL DEFAULT '',
                     ids                C(255)  NOTNULL DEFAULT '',
+                    description        XL      NOTNULL,
                     author_id          I       DEFAULT NULL UNSIGNED,
+                    history            XL      NOTNULL,
                     last_update        T
                     EOTEXT
                 ]
@@ -119,7 +127,7 @@ class TicketListPlugin extends MantisPlugin
      */
     private function addHttpHeaders(): void
     {
-        $hash = hash_file('sha256', __DIR__ . '/files/ticketlist.js');
+        $hash = hash_file('sha256', __DIR__ . '/files/main.js');
         http_csp_add('script-src', "'sha256-{$hash}'");
     }
 
@@ -130,7 +138,8 @@ class TicketListPlugin extends MantisPlugin
         }
         $pageRequested = $_GET['page'] ?? '';
         if ($page) {
-            return ($pageRequested === "TicketList/$page");
+            return ($pageRequested === "TicketList/$page")
+                || (strpos($pageRequested, "TicketList/$page/") === 0);
         } else {
             return (strncmp($page, 'TicketList', 10) === 0);
         }
