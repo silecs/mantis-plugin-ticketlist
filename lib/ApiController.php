@@ -63,6 +63,21 @@ class ApiController
                 }
                 $this->getTicket($ids);
                 break;
+            case "ticket/time":
+                if (self::readRequestVerb() !== 'GET') {
+                    http_response_code(400);
+                    echo '"Only GET verb is accepted for /ticket/time."';
+                    return;
+                }
+                $id = ($_GET['id'] ?? '');
+                $ids = array_filter(array_map('intval', explode(',', $id)));
+                if (!$ids) {
+                    http_response_code(400);
+                    echo '"Missing parameter (comma separated integer list): id"';
+                    return;
+                }
+                $this->getTicketTime($ids, self::readProjectId());
+                break;
             default:
                 http_response_code(404);
                 echo '"No process matches this parameter: action."';
@@ -166,6 +181,43 @@ class ApiController
                 ];
             }
         }
+        echo json_encode($result);
+    }
+
+    /**
+     * Response to GET /ticket/time/2029,5044
+     *
+     * TODO Filter the bug list according to permissions.
+     */
+    private function getTicketTime(array $ids, int $projectId): void
+    {
+        $idList = join(',', $ids);
+        $query = new DbQuery();
+        $sql = "SELECT sum(time_tracking) AS total FROM {bugnote} WHERE bug_id in ($idList)";
+        $query->sql($sql);
+        $rows = $query->fetch_all();
+        $result = [
+            'minutes' => (int) $rows[0]['total'],
+            'time' => db_minutes_to_hhmm((int) $rows[0]['total']),
+        ];
+
+        if ($projectId > 0) {
+            $query->sql = "SELECT * FROM {project_version} WHERE project_id = {$projectId} ORDER BY id DESC LIMIT 1";
+            $rows = $query->fetch_all();
+            if ($rows) {
+                $result["release"] = [
+                    'name' => $rows[0]['version'],
+                    'description' => $rows[0]['description'],
+                    'publicationTimestamp' => (int) $rows[0]['date_order'],
+                ];
+
+                $query->sql("$sql AND date_submitted > {$result['release']['publicationTimestamp']}");
+                $rows = $query->fetch_all();
+                $result['minutesSinceRelease'] = (int) $rows[0]['total'];
+                $result['timeSinceRelease'] = db_minutes_to_hhmm((int) $row['total']);
+            }
+        }
+
         echo json_encode($result);
     }
 

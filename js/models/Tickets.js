@@ -2,10 +2,19 @@ import m from "mithril"
 
 let content = []
 
+let timeSpent = {
+    time: "",
+    timeSinceRelease: "",
+    release: {
+        name: "",
+        publicationTimestamp: 0,
+    }
+}
+
 const loading = {
     ids: "",
     promise: null,
-    xhr: null,
+    xhr: [],
 }
 
 function parseIdsText(str) {
@@ -25,18 +34,64 @@ function parseIdsText(str) {
     return ids
 }
 
+function fetchTickets(idsString) {
+    return m.request({
+        method: "GET",
+        url: `/plugin.php`,
+        params: {
+            page: "TicketList/api",
+            action: "ticket",
+            id: idsString,
+        },
+        withCredentials: true,
+        config: function(xhr) {
+            loading.xhr.push(xhr)  // needed in order to cancel the request
+        },
+    }).then(function(result) {
+        content = result ?? [];
+        return content;
+    }).catch(function() {
+        alert(`Erreur en lisant l'api /ticket (ids ${idsString})`)
+    });
+}
+
+function fetchTicketsTime(idsString, projectId) {
+    return m.request({
+        method: "GET",
+        url: `/plugin.php`,
+        params: {
+            page: "TicketList/api",
+            action: "ticket/time",
+            id: idsString,
+            projectId,
+        },
+        withCredentials: true,
+        config: function(xhr) {
+            loading.xhr.push(xhr)  // needed in order to cancel the request
+        },
+    }).then(function(result) {
+        timeSpent = result ?? [];
+        return timeSpent;
+    }).catch(function() {
+        alert(`Erreur en lisant l'api /ticket/time (ids ${idsString})`)
+    });
+}
+
 export default {
     get() {
         return content;
     },
+    getTimeSpent() {
+        return timeSpent;
+    },
     isLoading() {
         return loading !== null;
     },
-    loadFromText(str) {
+    loadFromText(str, projectId) {
         const ids = parseIdsText(str)
-        return this.load(ids)
+        return this.load(ids, projectId)
     },
-    load(ids) {
+    load(ids, projectId) {
         const idsString = ids.join(',')
         if (idsString === '') {
             return Promise.resolve([])
@@ -45,32 +100,25 @@ export default {
             if (loading.ids === idsString) {
                 return loading.promise;
             }
-            if (loading.xhr !== null) {
-                loading.xhr.abort()
-                loading.xhr = null
+            if (loading.xhr.length > 0) {
+                for (let xhr of loading.xhr) {
+                    xhr.abort()
+                }
+                loading.xhr = []
                 loading.promise = null
             }
         }
         loading.ids = idsString
-        loading.promise = m.request({
-            method: "GET",
-            url: `/plugin.php`,
-            params: {
-                page: "TicketList/api",
-                action: "ticket",
-                id: idsString,
-            },
-            withCredentials: true,
-            config: function(xhr) { loading.xhr = xhr }, // needed in order to cancel the request
-        }).then(function(result) {
-            content = result ?? [];
-            return content;
-        }).catch(function() {
-            alert(`Erreur en lisant l'api /ticket (ids ${idsString})`)
-        }).finally(function() {
+        const requests = [fetchTickets(idsString)];
+        if (projectId > 0) {
+            requests.push(fetchTicketsTime(idsString, projectId));
+        } else {
+            timeSpent = {}
+        }
+        loading.promise = Promise.all(requests).finally(function() {
             loading.promise = null;
-            loading.xhr = null
-        });
+            loading.xhr = []
+        })
         return loading.promise
     }
 }
