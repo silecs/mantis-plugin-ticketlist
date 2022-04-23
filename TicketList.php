@@ -29,6 +29,14 @@ class TicketListPlugin extends MantisPlugin
         $this->url = '';
 
         $this->nonce = crypto_generate_uri_safe_nonce(16);
+
+        // Autoload classes whose FQDN is ticketlist\**
+        spl_autoload_register(function ($className) {
+            if (strncmp($className, 'ticketlist\\', 11) === 0) {
+                $path = str_replace('\\', '/', substr($className, 11));
+                require __DIR__ . "/lib/{$path}.php";
+            }
+        });
     }
 
     /**
