@@ -1,224 +1,118 @@
 <?php
 
+namespace ticketlist;
+
 class ApiController
 {
-    private string $action;
+    private $action;
 
-    public function __construct(string $action)
+    public function run(string $actionId): void
     {
-        $this->action = trim($action, "/");
-    }
+        $result = $this->dispatch(trim($actionId, "/"));
 
-    public function run(): void
-    {
         header("Cache-Control: no-store, no-cache, must-revalidate");
         header('Content-Type: application/json; charset="UTF-8"');
+        if ($this->action->httpCode !== 400) {
+            http_response_code($this->action->httpCode);
+        }
+        echo json_encode($result);
+    }
 
-        switch ($this->action) {
+    private function dispatch(string $actionId)
+    {
+        switch ($actionId) {
             case "list":
-                $id = (int) ($_GET['id'] ?? '');
-                $verb = self::readRequestVerb();
-                if ($verb === 'GET') {
-                    if ($id > 0) {
-                        $this->getList($id);
-                    } else {
-                        $this->getListAll(self::readProjectId());
-                    }
-                } elseif ($verb === 'PUT') {
-                    // TODO
-                } elseif ($verb === 'DELETE') {
-                    // TODO
-                } else {
-                    http_response_code(400);
-                    echo '"This HTTP verb is not accepted for /list."';
-                    return;
-                }
-                break;
+                return $this->dispatchList();
             case "project":
-                if (self::readRequestVerb() !== 'GET') {
-                    http_response_code(400);
-                    echo '"Only GET verb is accepted for /project."';
-                    return;
-                }
-                $id = (int) ($_GET['id'] ?? '');
-                if ($id <= 0) {
-                    http_response_code(400);
-                    echo '"Missing parameter: id"';
-                    return;
-                }
-                $this->getProject($id);
-                break;
+                return $this->dispatchProject();
             case "ticket":
-                if (self::readRequestVerb() !== 'GET') {
-                    http_response_code(400);
-                    echo '"Only GET verb is accepted for /ticket."';
-                    return;
-                }
-                $id = ($_GET['id'] ?? '');
-                $ids = array_filter(array_map('intval', explode(',', $id)));
-                if (!$ids) {
-                    http_response_code(400);
-                    echo '"Missing parameter (comma separated integer list): id"';
-                    return;
-                }
-                $this->getTicket($ids);
-                break;
+                return $this->dispatchTicket();
             case "ticket/time":
-                if (self::readRequestVerb() !== 'GET') {
-                    http_response_code(400);
-                    echo '"Only GET verb is accepted for /ticket/time."';
-                    return;
-                }
-                $id = ($_GET['id'] ?? '');
-                $ids = array_filter(array_map('intval', explode(',', $id)));
-                if (!$ids) {
-                    http_response_code(400);
-                    echo '"Missing parameter (comma separated integer list): id"';
-                    return;
-                }
-                $this->getTicketTime($ids, self::readProjectId());
-                break;
-            default:
-                http_response_code(404);
-                echo '"No process matches this parameter: action."';
-                return;
+                return $this->dispatchTicketTime();
+        }
+        $this->action = new api\ErrorAction();
+        $this->action->httpCode = 404;
+        return $this->action->run("No process matches this parameter: action.");
+    }
+
+    private function dispatchList()
+    {
+        $id = (int) ($_GET['id'] ?? '');
+        $verb = self::readRequestVerb();
+
+        if ($verb === 'GET') {
+            if ($id > 0) {
+                $this->action = new api\ListAction();
+                return $this->action->run($id);
             }
-    }
-
-    /**
-     * Response to GET /list/8
-     */
-    private function getList(int $id): void
-    {
-        $query = new DbQuery();
-        $tableName = plugin_table('persistent');
-        $query->sql("SELECT * FROM {$tableName} WHERE id = {$id}");
-        $row = $query->fetch();
-
-        $result = null;
-        if (!$row) {
-            http_response_code(404);
-        } else {
-            $result = [
-                'id' => (int) $row['id'],
-                'name' => $row['name'],
-                'projectId' => (int) $row['project_id'],
-                'authorId' => (int) $row['author_id'],
-                'ids' => $row['ids'],
-                'lastUpdate' => $row['last_update'],
-            ];
-            self::checkPermission($result['projectId']);
-        }
-        echo json_encode($result);
-    }
-
-    /**
-     * Response to GET /list/all
-     */
-    private function getListAll(int $projectId): void
-    {
-        self::checkPermission($projectId);
-
-        $query = new DbQuery();
-        $tableName = plugin_table('persistent');
-        $query->sql("SELECT * FROM {$tableName} WHERE project_id = {$projectId}");
-        $rows = $query->fetch_all();
-        if (!$rows) {
-            $rows = [];
-        }
-        echo json_encode($rows);
-    }
-
-    /**
-     * Response to GET /project/4
-     */
-    private function getProject(int $id): void
-    {
-        self::checkPermission($id);
-
-        $query = new DbQuery();
-        $query->sql("SELECT id, name FROM {project} WHERE id = {$id}");
-        $row = $query->fetch();
-
-        if (!$row) {
-            http_response_code(404);
-            $row = null;
-        }
-        echo json_encode($row);
-    }
-
-    /**
-     * Response to GET /ticket/2029,5044
-     */
-    private function getTicket(array $ids): void
-    {
-        $idList = join(',', $ids);
-        $sql = <<<EOSQL
-            SELECT b.id, b.status, b.summary
-            FROM {bug} b
-            WHERE b.id in ($idList)
-            ORDER BY find_in_set(b.id, '$idList') ASC
-            EOSQL;
-        $query = new DbQuery();
-        $query->sql($sql);
-        $rows = $query->fetch_all();
-
-        $toFrStatus = MantisEnum::getAssocArrayIndexedByValues(lang_get('status_enum_string'));
-        $result = [];
-        $accessLevel = config_get('view_summary_threshold');
-        if ($rows) {
-            foreach ($rows as $row) {
-                if (!access_has_bug_level($accessLevel, (int) $row['id'])) {
-                    // TODO Add a message in the response about the unauthorized bug_id.
-                    continue;
-                }
-                $result[] = [
-                    'id' => (int) $row['id'],
-                    'status' => (int) $row['status'],
-                    'statusTxt' => $toFrStatus[(int) $row['status']],
-                    'summary' => $row['summary'],
-                    'link' => string_get_bug_view_link((int) $row['id'], null, false)
-                ];
-            }
-        }
-        echo json_encode($result);
-    }
-
-    /**
-     * Response to GET /ticket/time/2029,5044
-     *
-     * TODO Filter the bug list according to permissions.
-     */
-    private function getTicketTime(array $ids, int $projectId): void
-    {
-        $idList = join(',', $ids);
-        $query = new DbQuery();
-        $sql = "SELECT sum(time_tracking) AS total FROM {bugnote} WHERE bug_id in ($idList)";
-        $query->sql($sql);
-        $rows = $query->fetch_all();
-        $result = [
-            'minutes' => (int) $rows[0]['total'],
-            'time' => db_minutes_to_hhmm((int) $rows[0]['total']),
-        ];
-
-        if ($projectId > 0) {
-            $query->sql = "SELECT * FROM {project_version} WHERE project_id = {$projectId} ORDER BY id DESC LIMIT 1";
-            $rows = $query->fetch_all();
-            if ($rows) {
-                $result["release"] = [
-                    'name' => $rows[0]['version'],
-                    'description' => $rows[0]['description'],
-                    'publicationTimestamp' => (int) $rows[0]['date_order'],
-                ];
-
-                $query->sql("$sql AND date_submitted > {$result['release']['publicationTimestamp']}");
-                $rows = $query->fetch_all();
-                $result['minutesSinceRelease'] = (int) $rows[0]['total'];
-                $result['timeSinceRelease'] = db_minutes_to_hhmm((int) $row['total']);
-            }
+            $this->action = new api\ListAllAction();
+            return $this->action->run(self::readProjectId());
         }
 
-        echo json_encode($result);
+        if ($verb === 'PUT') {
+            // TODO
+        }
+
+        if ($verb === 'DELETE') {
+            // TODO
+        }
+    
+        $this->action = new api\ErrorAction();
+        $this->action->httpCode = 400;
+        return $this->action->run("This HTTP verb is not accepted for /list.");
+    }
+
+    private function dispatchProject()
+    {
+        if (self::readRequestVerb() !== 'GET') {
+            $this->action = new api\ErrorAction();
+            $this->action->httpCode = 400;
+            return $this->action->run("The only HTTP verb accepted for /project is GET.");
+        }
+        $id = (int) ($_GET['id'] ?? '');
+        if ($id <= 0) {
+            $this->action = new api\ErrorAction();
+            $this->action->httpCode = 400;
+            return $this->action->run("Missing parameter: id");
+        }
+        $this->action = new api\ProjectAction();
+        return $this->action->run($id);
+    }
+
+    private function dispatchTicket()
+    {
+        if (self::readRequestVerb() !== 'GET') {
+            $this->action = new api\ErrorAction();
+            $this->action->httpCode = 400;
+            return $this->action->run("The only HTTP verb accepted for /ticket is GET.");
+        }
+        $id = ($_GET['id'] ?? '');
+        $ids = array_filter(array_map('intval', explode(',', $id)));
+        if (!$ids) {
+            $this->action = new api\ErrorAction();
+            $this->action->httpCode = 400;
+            return $this->action->run("Missing parameter (comma separated integer list): id");
+        }
+        $this->action = new api\TicketAction();
+        return $this->action->run($ids);
+    }
+
+    private function dispatchTicketTime()
+    {
+        if (self::readRequestVerb() !== 'GET') {
+            $this->action = new api\ErrorAction();
+            $this->action->httpCode = 400;
+            return $this->action->run("The only HTTP verb accepted for /ticket is GET.");
+        }
+        $id = ($_GET['id'] ?? '');
+        $ids = array_filter(array_map('intval', explode(',', $id)));
+        if (!$ids) {
+            $this->action = new api\ErrorAction();
+            $this->action->httpCode = 400;
+            return $this->action->run("Missing parameter (comma separated integer list): id");
+        }
+        $this->action = new api\TicketTimeAction();
+        return $this->action->run($ids, self::readProjectId());
     }
 
     private static function readRequestVerb(): string
@@ -234,11 +128,9 @@ class ApiController
         if ($projectStr === '') {
             return (int) helper_get_current_project();
         }
-        return $projectId = (int) $projectStr;
-    }
 
-    private static function checkPermission(int $projectId): void
-    {
+        $projectId = (int) $projectStr;
         access_ensure_project_level(config_get('view_summary_threshold'), $projectId);
+        return $projectId;
     }
 }
