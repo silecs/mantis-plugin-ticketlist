@@ -7,29 +7,38 @@ import WidgetBox from "./WidgetBox";
 
 const STATUS_RESOLVED = 80
 
+const TimeSpent = {
+    view(vnode) {
+        const timeSpent = Tickets.getTimeSpent()
+        if (!timeSpent || !timeSpent.minutes) {
+            return null
+        }
+        return m('div', 
+            `Temps total consacré à ces tickets : ${timeSpent.time}`,
+            timeSpent.minutes > 0 && timeSpent.release && timeSpent.release.name
+                ? ["dont ", m('strong', timeSpent.timeSinceRelease), " depuis la livraison ", m('em', timeSpent.release.name)]
+                : null
+        );
+    },
+}
+
 export default {
     oninit(vnode) {
         List.load(vnode.attrs.listId)
         .then(() => {
-            const l = List.get()
-            Tickets.loadFromText(l.ids, l.projectId)
+            Tickets.load(List.getTicketIds(), List.get().projectId)
         })
     },
     view(vnode) {
         const tickets = Tickets.get()
-        const timeSpent = Tickets.getTimeSpent()
         return m('div.blocks-container',
             m(WidgetBox, {class: "widget-color-blue2", id: "select-tickets", title: `Sélection`},
                 m(ListForm),
             ),
             m(WidgetBox, {
                     title: `Tickets listés (${tickets.length})`,
-                    footer: m('div', 
-                    `Temps total consacré à ces tickets : ${timeSpent.time}`,
-                    timeSpent.minutes > 0 && timeSpent.release && timeSpent.release.name
-                        ? ["dont ", m('strong', timeSpent.timeSinceRelease), " depuis la livraison ", m('em', timeSpent.release.name)]
-                        : null
-                )},
+                    footer: m(TimeSpent)
+                },
                 m(TicketsBlock, {
                     tickets: tickets,
                 }),

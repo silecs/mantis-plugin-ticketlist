@@ -17,23 +17,6 @@ const loading = {
     xhr: [],
 }
 
-function parseIdsText(str) {
-    const ids = []
-    const lines = str.split(/\n/)
-    for (let line of lines) {
-        if (!line.match(/^\s*\d+/)) {
-            continue;
-        }
-        for (let num of line.split(/[\s,]+/)) {
-            const id = parseInt(num, 10)
-            if (id > 0) {
-                ids.push(id)
-            }
-        }
-    }
-    return ids
-}
-
 function fetchTickets(idsString) {
     return m.request({
         method: "GET",
@@ -70,7 +53,7 @@ function fetchTicketsTime(idsString, projectId) {
             loading.xhr.push(xhr)  // needed in order to cancel the request
         },
     }).then(function(result) {
-        timeSpent = result ?? [];
+        timeSpent = result ?? null;
         return timeSpent;
     }).catch(function() {
         alert(`Erreur en lisant l'api /ticket/time (ids ${idsString})`)
@@ -84,12 +67,12 @@ export default {
     getTimeSpent() {
         return timeSpent;
     },
+    hasChanged(ids) {
+        const idsString = ids.join(',')
+        return !loading.ids || (loading.ids !== idsString)
+    },
     isLoading() {
         return loading !== null;
-    },
-    loadFromText(str, projectId) {
-        const ids = parseIdsText(str)
-        return this.load(ids, projectId)
     },
     load(ids, projectId) {
         const idsString = ids.join(',')

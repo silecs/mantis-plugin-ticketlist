@@ -20,6 +20,12 @@ class TicketTimeAction implements Action
         $sql = "SELECT sum(time_tracking) AS total FROM {bugnote} WHERE bug_id in ($idList)";
         $query->sql($sql);
         $rows = $query->fetch_all();
+        if (!$rows) {
+            return [
+                'minutes' => 0,
+                'time' => "",
+            ];
+        }
         $result = [
             'minutes' => (int) $rows[0]['total'],
             'time' => db_minutes_to_hhmm((int) $rows[0]['total']),
