@@ -4,11 +4,19 @@ namespace ticketlist;
 
 class ApiController
 {
-    private $action;
+    private ?api\Action $action;
 
     public function run(string $actionId): void
     {
-        $result = $this->dispatch(trim($actionId, "/"));
+        try {
+            $result = $this->dispatch(trim($actionId, "/"));
+        } catch (HttpException $e) {
+            $this->action->httpCode = $e->code;
+            $result = ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $this->action->httpCode = 500;
+            $result = ['error' => $e->getMessage()];
+        }
 
         header("Cache-Control: no-store, no-cache, must-revalidate");
         header('Content-Type: application/json; charset="UTF-8"');
@@ -124,12 +132,10 @@ class ApiController
 
     private static function readProjectId(): int
     {
-        $projectStr = $_GET['projectId'] ?? '';
-        if ($projectStr === '') {
-            return (int) helper_get_current_project();
+        if (!isset($_GET['projectId'])) {
+            throw new HttpException(400, "Parameter 'projectId' is missing.");
         }
-
-        $projectId = (int) $projectStr;
+        $projectId = (int) $_GET['projectId'];
         access_ensure_project_level(config_get('view_summary_threshold'), $projectId);
         return $projectId;
     }
