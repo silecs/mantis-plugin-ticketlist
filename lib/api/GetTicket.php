@@ -8,7 +8,7 @@ use MantisEnum;
 /**
  * Response to GET /ticket/2029,5044
  */
-class TicketAction implements Action
+class GetTicket implements Action
 {
     public int $httpCode = 200;
 

@@ -7,7 +7,7 @@ use DbQuery;
 /**
  * Response to GET /project/4
  */
-class ProjectAction implements Action
+class GetProject implements Action
 {
     public int $httpCode = 200;
 

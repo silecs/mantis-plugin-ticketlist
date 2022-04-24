@@ -9,7 +9,7 @@ use DbQuery;
  *
  * TODO Filter the bug list according to permissions.
  */
-class TicketTimeAction implements Action
+class GetTicketTime implements Action
 {
     public int $httpCode = 200;
 

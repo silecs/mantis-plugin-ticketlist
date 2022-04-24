@@ -7,7 +7,7 @@ use DbQuery;
 /**
  * Response to GET /list/8
  */
-class ListAction implements Action
+class GetList implements Action
 {
     public int $httpCode = 200;
 

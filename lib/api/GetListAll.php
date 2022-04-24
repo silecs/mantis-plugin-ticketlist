@@ -5,9 +5,9 @@ namespace ticketlist\api;
 use DbQuery;
 
 /**
- * Response to GET /list/all
+ * Response to GET /list
  */
-class ListAllAction implements Action
+class GetListAll implements Action
 {
     public int $httpCode = 200;
 

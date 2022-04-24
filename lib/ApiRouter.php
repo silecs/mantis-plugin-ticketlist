@@ -47,15 +47,15 @@ class ApiRouter
 
         if ($verb === 'GET') {
             if ($id > 0) {
-                $this->setAction(new api\ListAction());
+                $this->setAction(new api\GetList());
                 return $this->response->action->run($id);
             }
-            $this->setAction(new api\ListAllAction());
+            $this->setAction(new api\GetListAll());
             return $this->response->action->run(Request::readProjectId());
         }
 
         if ($verb === 'PUT') {
-            $this->setAction(new api\ListSaveAction());
+            $this->setAction(new api\PutList());
             return $this->response->action->run(Request::readBody());
         }
 
@@ -75,7 +75,7 @@ class ApiRouter
         if ($id <= 0) {
             return $this->returnError(400, "Missing parameter: id");
         }
-        $this->setAction(new api\ProjectAction());
+        $this->setAction(new api\GetProject());
         return $this->response->action->run($id);
     }
 
@@ -89,7 +89,7 @@ class ApiRouter
         if (!$ids) {
             return $this->returnError(400, "Missing parameter (comma separated integer list): id");
         }
-        $this->setAction(new api\TicketAction());
+        $this->setAction(new api\GetTicket());
         return $this->response->action->run($ids);
     }
 
@@ -103,7 +103,7 @@ class ApiRouter
         if (!$ids) {
             return $this->returnError(400, "Missing parameter (comma separated integer list): id");
         }
-        $this->setAction(new api\TicketTimeAction());
+        $this->setAction(new api\GetTicketTime());
         return $this->response->action->run($ids, Request::readProjectId());
     }
 
