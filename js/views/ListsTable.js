@@ -7,7 +7,7 @@ const ListsTable = {
         if (Lists.isLoading()) {
             return m('div', "Chargement…")
         }
-        return m('table.table.table-striped.table-bordered.table-condensed',
+        return m('table.table.table-striped.table-bordered',
             m('thead',
                 m('tr',
                     m('th', Project.get().name + " - listes"),
@@ -53,7 +53,7 @@ const RefreshButton = {
                     Lists.load(vnode.attrs.projectId);
                 }
             },
-            "Rafraîchir"
+            [m('i.fa.fa-refresh'), " Rafraîchir"]
         );
     },
 }
@@ -69,7 +69,7 @@ const NewlistButton = {
                     m.route.set('', params, options)
                 }
             },
-            "Nouvelle liste"
+            [m('i.fa.fa-eraser'), "Nouvelle liste"]
         )
     },
 }
@@ -81,12 +81,12 @@ export default {
         Lists.load(vnode.attrs.projectId);
     },
     view(vnode) {
-        return m('div.lists-table',
-            m(ListsTable),
+        return m('div#lists-table',
             m("div.actions", 
                 m(RefreshButton, {projectId: vnode.attrs.projectId}),
                 m(NewlistButton, {projectId: vnode.attrs.projectId}),
             ),
+            m(ListsTable),
         );
     },
 }

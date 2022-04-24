@@ -1,3 +1,14 @@
+#lists-table > table.table {
+    width: 80%;
+}
+#lists-table > .actions {
+    float: right;
+}
+
+#ticketlist-form .actions {
+    display: flex;
+    justify-content: space-between;
+}
 
 .blocks-container {
     display: flex;

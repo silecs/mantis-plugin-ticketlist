@@ -5,6 +5,7 @@ const emptyList = {
     ids: "",
     name: "",
     projectId: 0,
+    lastUpdate: "",
 }
 
 let content = emptyList
@@ -31,11 +32,7 @@ function fetchList(id) {
         } else {
             serverData.content = result
         }
-        content = Object.assign({}, serverData.content ?? emptyList);
-        if (content.ids.match(/^[\d,]+$/)) {
-            content.ids = content.ids.replace(',', "\n") + "\n"
-        }
-        return content;
+        return result
     }).catch(function() {
         alert(`Erreur en lisant l'api /list/${id}`)
     }).finally(function() {
@@ -83,10 +80,16 @@ export default {
         return loading !== null;
     },
     load(id) {
-        if (loading !== null) {
-            return loading;
+        if (loading === null) {
+            loading = fetchList(id)
         }
-        loading = fetchList(id)
+        loading.then(function(result) {
+            content = Object.assign({}, serverData.content ?? emptyList);
+            if (content.ids.match(/^[\d,]+$/)) {
+                content.ids = content.ids.replaceAll(',', "\n") + "\n"
+            }
+            return content;
+        })
         return loading
     },
 }

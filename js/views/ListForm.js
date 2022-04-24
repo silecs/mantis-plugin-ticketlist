@@ -17,7 +17,7 @@ const ListContent = {
             m('textarea.form-control', {
                 cols:10,
                 rows:20,
-                placeholder: "un numéro par ligne",
+                placeholder: "Pour les lignes commençant par un numéro de ticket, tous les tickets référencés dans le texte sont affichés.\n\nLe reste est vu comme un commentaire.",
                 oninput(event) {
                     List.setText(this.value)
                     const ticketIds = List.getTicketIds()
@@ -34,17 +34,61 @@ const ListContent = {
 const ListName = {
     view(vnode) {
         return m(FormGroup, {label: "Titre de la liste"},
-            m('input.form-control', {placeholder: "nécessaire pour enregistrer la liste", value: List.get().name})
+            m('input.form-control', {
+                oninput() {
+                    List.setName(this.value)
+                },
+                placeholder: "nécessaire pour enregistrer la liste",
+                value: List.get().name,}
+            )
+        );
+    },
+}
+
+const SaveButton = {
+    view(vnode) {
+        const l = List.get()
+        return m('button.btn.btn-primary', {
+            type: 'button',
+            onclick() {
+                // TODO
+            },
+            title: "Enregistrer cette liste sur le serveur",
+            disabled: (l.name === ''),},
+            [m('i.fa.fa-' + (l.id > 0 ? 'pencil' : 'plus')), " Publier"]
+        );
+    },
+}
+
+const DeleteButton = {
+    view(vnode) {
+        const l = List.get()
+        if (l.id === 0) {
+            return null
+        }
+        return m('button.btn.btn-danger', {
+            type: 'button',
+            onclick() {
+                if (!confirm("Supprimer définitivement cette liste du serveur ?")) {
+                    return false
+                }
+                // TODO
+            },
+            title: "Supprimer cette liste du serveur",},
+            [m('i.fa.fa-trash'), " Supprimer"]
         );
     },
 }
 
 export default {
     view(vnode) {
-        return m('form.form',
+        return m('form.form#ticketlist-form',
             m(ListContent),
             m(ListName),
-            m('button.btn.btn-primary', {title: "Enregistrer cette liste sur le serveur", disabled: (List.get().name === '')}, "Publier"),
+            m('div.actions',
+                m(SaveButton),
+                m(DeleteButton),
+            ),
         );
     },
 }
