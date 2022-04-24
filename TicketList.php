@@ -120,8 +120,8 @@ class TicketListPlugin extends MantisPlugin
                     project_id         I       DEFAULT NULL UNSIGNED,
                     name               C(255)  NOTNULL DEFAULT '',
                     ids                C(255)  NOTNULL DEFAULT '',
-                    author_id          I       DEFAULT NULL UNSIGNED,
                     history            XL      NOTNULL,
+                    author_id          I       DEFAULT NULL UNSIGNED,
                     last_update        T
                     EOTEXT
                 ]

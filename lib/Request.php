@@ -4,7 +4,7 @@ namespace ticketlist;
 
 class Request
 {
-    public static function readBody(): string
+    public static function readBody()
     {
         $raw = file_get_contents('php://input');
         return \json_decode($raw, false, 8, JSON_THROW_ON_ERROR);

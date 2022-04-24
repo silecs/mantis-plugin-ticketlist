@@ -22,17 +22,31 @@ const TimeSpent = {
     },
 }
 
+const Title = {
+    view(vnode) {
+        return m('span',
+            "Sélection ",
+            List.hasChanged()
+                ? m('i.fa.fa-exclamation-triangle', {title: "Les modifications locales ne sont pas enregistrées.", style: "color: #800000"})
+                : null,
+        );
+    },
+}
+
 export default {
     oninit(vnode) {
-        List.load(vnode.attrs.listId)
-        .then(() => {
-            Tickets.load(List.getTicketIds(), List.get().projectId)
-        })
+        List.setProjectId(vnode.attrs.projectId)
+        if (vnode.attrs.listId > 0) {
+            List.load(vnode.attrs.listId)
+            .then(() => {
+                Tickets.load(List.getTicketIds(), List.get().projectId)
+            })
+        }
     },
     view(vnode) {
         const tickets = Tickets.get()
         return m('div.blocks-container',
-            m(WidgetBox, {class: "widget-color-blue2", id: "select-tickets", title: `Sélection`},
+            m(WidgetBox, {class: "widget-color-blue2", id: "select-tickets", title: m(Title)},
                 m(ListForm),
             ),
             m(WidgetBox, {

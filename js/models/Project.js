@@ -23,6 +23,9 @@ export default {
             return Promise.resolve(content)
         }
 
+        content.id = id
+        content.name = "Chargement…"
+
         loading = m.request({
             method: "GET",
             url: "/plugin.php",

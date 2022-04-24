@@ -1,4 +1,5 @@
 import m from "mithril"
+import Project from "./Project"
 
 const emptyList = {
     id: 0,
@@ -73,13 +74,24 @@ export default {
     setText(txt) {
         content.ids = txt
     },
+    setProjectId(projectId) {
+        console.log(projectId)
+        emptyList.projectId = projectId
+        content.projectId = projectId
+    },
     hasChanged() {
-        return !serverData.content || (serverData.content.ids !== content.ids)
+        if (!serverData.content) {
+            return (content.ids.trim() !== '')
+        }
+        return (content.ids.trim() !== serverData.content.ids.trim());
     },
     isLoading() {
         return loading !== null;
     },
     load(id) {
+        if (typeof id !== 'number' || id < 0) {
+            return Promise.resolve(emptyList)
+        }
         if (loading === null) {
             loading = fetchList(id)
         }
@@ -91,5 +103,26 @@ export default {
             return content;
         })
         return loading
+    },
+    save() {
+        return m.request({
+            method: "PUT",
+            url: `/plugin.php`,
+            params: {
+                page: "TicketList/api",
+                action: "list",
+            },
+            body: content,
+            withCredentials: true,
+        }).then(function(result) {
+            if (result.status === 'success') {
+                serverData.content = result.content
+                content = result.content
+            }
+            return result
+        }).catch(function(message) {
+            // TODO Store the error returned by PUT /list.
+            alert(`Erreur en écrivant dans l'api /list:\n${message}`)
+        });
     },
 }

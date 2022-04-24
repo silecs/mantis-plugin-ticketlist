@@ -51,10 +51,11 @@ const SaveButton = {
         return m('button.btn.btn-primary', {
             type: 'button',
             onclick() {
-                // TODO
+                // TODO request PUT /list
+                List.save()
             },
             title: "Enregistrer cette liste sur le serveur",
-            disabled: (l.name === ''),},
+            disabled: (l.name === '') || !List.hasChanged(),},
             [m('i.fa.fa-' + (l.id > 0 ? 'pencil' : 'plus')), " Publier"]
         );
     },
@@ -72,7 +73,7 @@ const DeleteButton = {
                 if (!confirm("Supprimer définitivement cette liste du serveur ?")) {
                     return false
                 }
-                // TODO
+                // TODO request DELETE /list
             },
             title: "Supprimer cette liste du serveur",},
             [m('i.fa.fa-trash'), " Supprimer"]
