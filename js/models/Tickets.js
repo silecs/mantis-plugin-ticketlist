@@ -77,6 +77,8 @@ export default {
     load(ids, projectId) {
         const idsString = ids.join(',')
         if (idsString === '') {
+            content = []
+            timeSpent = null
             return Promise.resolve([])
         }
         if (loading.promise !== null) {

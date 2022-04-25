@@ -112,7 +112,9 @@ export default {
         });
     },
     load(id) {
-        if (typeof id !== 'number' || id < 0) {
+        if (isNaN(id) || (typeof id !== 'number') || id <= 0) {
+            serverData.content = null
+            content = Object.assign({}, emptyList);
             return Promise.resolve(emptyList)
         }
         if (loading === null) {

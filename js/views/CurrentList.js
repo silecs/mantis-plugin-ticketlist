@@ -33,14 +33,20 @@ const Title = {
     },
 }
 
+function update(projectId, listId) {
+    List.setProjectId(projectId)
+    List.load(listId).then(() => {
+        Tickets.load(List.getTicketIds(), List.get().projectId)
+    })
+}
+
 export default {
     oninit(vnode) {
-        List.setProjectId(vnode.attrs.projectId)
-        if (vnode.attrs.listId > 0) {
-            List.load(vnode.attrs.listId)
-            .then(() => {
-                Tickets.load(List.getTicketIds(), List.get().projectId)
-            })
+        update(vnode.attrs.projectId, vnode.attrs.listId)
+    },
+    onbeforeupdate(vnode, oldVnode) {
+        if (oldVnode.attrs.listId !== vnode.attrs.listId) {
+            update(vnode.attrs.projectId, vnode.attrs.listId)
         }
     },
     view(vnode) {

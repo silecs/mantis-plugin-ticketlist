@@ -2,12 +2,14 @@ import m from "mithril"
 import Lists from "../models/Lists"
 import Project from "../models/Project"
 
+let activeListId = 0;
+
 const ListsTable = {
     view(vnode) {
         if (Lists.isLoading()) {
             return m('div', "Chargement…")
         }
-        return m('table.table.table-striped.table-bordered',
+        return m('table.table.table-striped.table-bordered.table-condensed',
             m('thead',
                 m('tr',
                     m('th', Project.get().name + " - listes"),
@@ -38,8 +40,10 @@ const ListBody = {
 const ListTr = {
     view(vnode) {
         const l = vnode.attrs.list
-        return m('tr',
-            m('td', l.name),
+        return m('tr', (l.id == activeListId ? {class: "info"} : {}),
+            m('td',
+                m(m.route.Link, {href: `/project/${l.project_id}/list/${l.id}`}, l.name)
+            ),
             m('td', l.last_update),
         );
     }
@@ -60,13 +64,13 @@ const RefreshButton = {
 
 const NewlistButton = {
     view(vnode) {
-        if (isNaN(parseInt(vnode.attrs.id))) {
+        if (!vnode.attrs.listId) {
             return null
         }
         return m('button.btn.btn-default',
             {
                 onclick: function() {
-                    m.route.set('', params, options)
+                    m.route.set(`/project/${vnode.attrs.projectId}/list/new`)
                 }
             },
             [m('i.fa.fa-eraser'), "Nouvelle liste"]
@@ -81,10 +85,11 @@ export default {
         Lists.load(vnode.attrs.projectId);
     },
     view(vnode) {
+        activeListId = vnode.attrs.listId
         return m('div#lists-table',
             m("div.actions", 
                 m(RefreshButton, {projectId: vnode.attrs.projectId}),
-                m(NewlistButton, {projectId: vnode.attrs.projectId}),
+                m(NewlistButton, {projectId: vnode.attrs.projectId, listId: activeListId}),
             ),
             m(ListsTable),
         );

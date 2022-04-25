@@ -8,17 +8,23 @@ export default {
         const projectId = parseInt(vnode.attrs.projectId, 10)
         Project.load(projectId)
     },
-    onbeforeupdate(oldVnode, newVnode) {
-        if (oldVnode.attrs.projectId !== newVnode.attrs.projectId) {
-            const projectId = parseInt(newVnode.attrs.projectId, 10)
+    onbeforeupdate(vnode, oldVnode) {
+        if (oldVnode.attrs.projectId !== vnode.attrs.projectId) {
+            const projectId = parseInt(vnode.attrs.projectId, 10)
             Project.load(projectId)
         }
     },
     view(vnode) {
-        const listId = parseInt(vnode.attrs.listId, 10)
-        const projectId = parseInt(vnode.attrs.projectId, 10)
+        let projectId = parseInt(vnode.attrs.projectId, 10) ?? 0
+        if (isNaN(projectId) || projectId < 0) {
+            projectId = 0
+        }
+        let listId = parseInt(vnode.attrs.key, 10)
+        if (isNaN(listId) || listId < 0) {
+            listId = 0
+        }
         return m('div',
-            m(ListsTable, {projectId}),
+            m(ListsTable, {projectId, listId}),
             m(CurrentList, {projectId, listId})
         )
     },
