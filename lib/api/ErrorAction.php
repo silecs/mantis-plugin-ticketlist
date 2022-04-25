@@ -2,9 +2,12 @@
 
 namespace ticketlist\api;
 
-class ErrorAction implements Action
+class ErrorAction extends Action
 {
-    public int $httpCode = 500;
+    public function __construct(int $code = 500)
+    {
+        $this->httpCode = $code;
+    }
 
     public function run($errorResponse)
     {

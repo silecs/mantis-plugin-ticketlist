@@ -9,10 +9,8 @@ use ticketlist\models\Liste;
 /**
  * Response to PUT /list
  */
-class PutList implements Action
+class PutList extends Action
 {
-    public int $httpCode = 200;
-
     public function run(Liste $toSave)
     {
         $tableName = plugin_table('persistent');

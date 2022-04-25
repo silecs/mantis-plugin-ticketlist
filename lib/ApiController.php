@@ -11,8 +11,8 @@ class ApiController
 
         header("Cache-Control: no-store, no-cache, must-revalidate");
         header('Content-Type: application/json; charset="UTF-8"');
-        if ($response->action->httpCode !== 200) {
-            http_response_code($response->action->httpCode);
+        if ($response->action->getHttpCode() !== 200) {
+            http_response_code($response->action->getHttpCode());
         }
         echo json_encode($response->result);
     }

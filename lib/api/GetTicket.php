@@ -8,10 +8,8 @@ use MantisEnum;
 /**
  * Response to GET /ticket/2029,5044
  */
-class GetTicket implements Action
+class GetTicket extends Action
 {
-    public int $httpCode = 200;
-
     public function run(array $ids)
     {
         $idList = join(',', $ids);

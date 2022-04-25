@@ -11,10 +11,8 @@ use ticketlist\models\Liste;
 /**
  * Response to DELETE /list
  */
-class DeleteList implements Action
+class DeleteList extends Action
 {
-    public int $httpCode = 200;
-
     public function run(Liste $toDelete)
     {
         $this->validate($toDelete);

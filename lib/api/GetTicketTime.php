@@ -9,10 +9,8 @@ use DbQuery;
  *
  * TODO Filter the bug list according to permissions.
  */
-class GetTicketTime implements Action
+class GetTicketTime extends Action
 {
-    public int $httpCode = 200;
-
     public function run(array $ids, int $projectId)
     {
         $idList = join(',', $ids);

@@ -18,11 +18,9 @@ class ApiRouter
         try {
             $this->setResult($this->dispatch($actionId));
         } catch (HttpException $e) {
-            $this->response->action->httpCode = $e->code;
-            $this->setResult(['error' => $e->getMessage()]);
+            $this->setResult($this->returnError($e->getCode(), ['error' => $e->getMessage()]));
         } catch (\Throwable $e) {
-            $this->response->action->httpCode = 500;
-            $this->setResult(['error' => $e->getMessage()]);
+            $this->setResult($this->returnError(500, ['error' => $e->getMessage()]));
         }
         return $this->response;
     }
@@ -114,8 +112,7 @@ class ApiRouter
 
     private function returnError(int $code, $message)
     {
-        $error = new api\ErrorAction();
-        $error->httpCode = $code;
+        $error = new api\ErrorAction($code);
         $this->setAction($error);
         return $this->response->action->run($message);
     }

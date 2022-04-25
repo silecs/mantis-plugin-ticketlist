@@ -7,10 +7,8 @@ use DbQuery;
 /**
  * Response to GET /list
  */
-class GetListAll implements Action
+class GetListAll extends Action
 {
-    public int $httpCode = 200;
-
     public function run(int $projectId)
     {
         $query = new DbQuery();

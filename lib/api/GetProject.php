@@ -4,13 +4,13 @@ namespace ticketlist\api;
 
 use DbQuery;
 
+use ticketlist\HttpException;
+
 /**
  * Response to GET /project/4
  */
-class GetProject implements Action
+class GetProject extends Action
 {
-    public int $httpCode = 200;
-
     public function run(int $id)
     {
         $query = new DbQuery();
@@ -18,8 +18,7 @@ class GetProject implements Action
         $row = $query->fetch();
 
         if (!$row) {
-            http_response_code(404);
-            $row = null;
+            throw new HttpException(404, "Liste non trouvée.");
         }
         return $row;
     }
