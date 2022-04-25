@@ -7,7 +7,7 @@ class Request
     public static function readBody()
     {
         $raw = file_get_contents('php://input');
-        return \json_decode($raw, false, 8, JSON_THROW_ON_ERROR);
+        return \json_decode($raw, true, 8, JSON_THROW_ON_ERROR);
     }
 
     public static function readRequestVerb(): string
@@ -23,7 +23,9 @@ class Request
             throw new HttpException(400, "Parameter 'projectId' is missing.");
         }
         $projectId = (int) $_GET['projectId'];
-        access_ensure_project_level(config_get('view_summary_threshold'), $projectId);
+        if (!\access_has_project_level(\config_get('view_summary_threshold'), $projectId)) {
+            throw new HttpException(403, "Vous n'avez pas l'autorisation d'accéder à ce projet.");
+        }
         return $projectId;
     }
 }

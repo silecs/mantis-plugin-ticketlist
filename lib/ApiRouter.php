@@ -2,6 +2,8 @@
 
 namespace ticketlist;
 
+use ticketlist\models\Liste;
+
 class ApiRouter
 {
     public Response $response;
@@ -56,20 +58,23 @@ class ApiRouter
 
         if ($verb === 'PUT') {
             $this->setAction(new api\PutList());
-            return $this->response->action->run(Request::readBody());
+            $liste = new Liste(Request::readBody());
+            return $this->response->action->run($liste);
         }
 
         if ($verb === 'DELETE') {
-            // TODO Implement DELETE /list
+            $this->setAction(new api\DeleteList());
+            $liste = new Liste(Request::readBody());
+            return $this->response->action->run($liste);
         }
     
-        return $this->returnError(400, "This HTTP verb is not accepted for /list.");
+        return $this->returnError(405, "This HTTP verb is not accepted for /list.");
     }
 
     private function dispatchProject()
     {
         if (Request::readRequestVerb() !== 'GET') {
-            return $this->returnError(400, "The only HTTP verb accepted for /project is GET.");
+            return $this->returnError(405, "The only HTTP verb accepted for /project is GET.");
         }
         $id = (int) ($_GET['id'] ?? '');
         if ($id <= 0) {
@@ -82,7 +87,7 @@ class ApiRouter
     private function dispatchTicket()
     {
         if (Request::readRequestVerb() !== 'GET') {
-            return $this->returnError(400, "The only HTTP verb accepted for /ticket is GET.");
+            return $this->returnError(405, "The only HTTP verb accepted for /ticket is GET.");
         }
         $id = ($_GET['id'] ?? '');
         $ids = array_filter(array_map('intval', explode(',', $id)));
@@ -96,7 +101,7 @@ class ApiRouter
     private function dispatchTicketTime()
     {
         if (Request::readRequestVerb() !== 'GET') {
-            return $this->returnError(400, "The only HTTP verb accepted for /ticket is GET.");
+            return $this->returnError(405, "The only HTTP verb accepted for /ticket is GET.");
         }
         $id = ($_GET['id'] ?? '');
         $ids = array_filter(array_map('intval', explode(',', $id)));
