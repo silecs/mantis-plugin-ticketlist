@@ -48,15 +48,20 @@ const ListName = {
 const SaveButton = {
     view(vnode) {
         const l = List.get()
+        const creation = !(l.id > 0);
         return m('button.btn.btn-primary', {
             type: 'button',
             onclick() {
-                // TODO request PUT /list
-                List.save()
+                List.save().then((result) => {
+                    if (creation) {
+                        const newList = result.content
+                        m.route.set(`/project/${newList.projectId}/list/${newList.id}`)
+                    }
+                });
             },
             title: "Enregistrer cette liste sur le serveur",
             disabled: (l.name === '') || !List.hasChanged(),},
-            [m('i.fa.fa-' + (l.id > 0 ? 'pencil' : 'plus')), " Publier"]
+            [m('i.fa.fa-' + (creation ? 'plus' : 'pencil')), " Publier"]
         );
     },
 }
@@ -73,7 +78,7 @@ const DeleteButton = {
                 if (!confirm("Supprimer définitivement cette liste du serveur ?")) {
                     return false
                 }
-                // TODO request DELETE /list
+                List.delete().then(() => m.route.set(`/project/${List.get().projectId}/list/new`))
             },
             title: "Supprimer cette liste du serveur",},
             [m('i.fa.fa-trash'), " Supprimer"]

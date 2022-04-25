@@ -75,7 +75,6 @@ export default {
         content.ids = txt
     },
     setProjectId(projectId) {
-        console.log(projectId)
         emptyList.projectId = projectId
         content.projectId = projectId
     },
@@ -87,6 +86,30 @@ export default {
     },
     isLoading() {
         return loading !== null;
+    },
+    delete() {
+        if (content.id === 0) {
+            return Promise.reject("La suppression d'une liste non-enregistrée est impossible.");
+        }
+        return m.request({
+            method: "DELETE",
+            url: `/plugin.php`,
+            params: {
+                page: "TicketList/api",
+                action: "list",
+            },
+            body: content,
+            withCredentials: true,
+        }).then(function(result) {
+            if (result.status === 'success') {
+                serverData.content = null
+                content = Object.assign({}, emptyList);
+            }
+            return result
+        }).catch(function(message) {
+            // TODO Handle the error returned by DELETE /list.
+            alert(`Erreur en écrivant dans l'api DELETE /list:\n${message}`)
+        });
     },
     load(id) {
         if (typeof id !== 'number' || id < 0) {
@@ -117,12 +140,13 @@ export default {
         }).then(function(result) {
             if (result.status === 'success') {
                 serverData.content = result.content
-                content = result.content
+                content = Object.assign({}, result.content)
             }
+            // TODO Handle status 'need-confirm'
             return result
         }).catch(function(message) {
-            // TODO Store the error returned by PUT /list.
-            alert(`Erreur en écrivant dans l'api /list:\n${message}`)
+            // TODO Handle the error returned by PUT /list.
+            alert(`Erreur en écrivant dans l'api PUT /list:\n${message}`)
         });
     },
 }
