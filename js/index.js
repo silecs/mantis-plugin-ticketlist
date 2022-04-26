@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     Project.readJsonBlock('ticket-list-data')
     const projectId = Project.get().id
 
-    const rootElement = document.getElementById('ticket-list-container')
+    const rootElement = document.getElementById('ticketlist-container')
     if (rootElement === null) {
         alert("invalid HTML")
         return;

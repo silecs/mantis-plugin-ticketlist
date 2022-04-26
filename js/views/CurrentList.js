@@ -24,12 +24,32 @@ const TimeSpent = {
 
 const Title = {
     view(vnode) {
-        return m('span',
-            "Sélection ",
-            List.hasChanged()
-                ? m('i.fa.fa-exclamation-triangle', {title: "Les modifications locales ne sont pas encore enregistrées.", style: "color: #800000"})
-                : null,
-        );
+        return [
+            m('span',
+                "Sélection ",
+                List.hasChanged()
+                    ? m('i.fa.fa-exclamation-triangle', {title: "Les modifications locales ne sont pas encore enregistrées.", style: "color: #800000"})
+                    : null,
+            ),
+            m(NewlistButton, {projectId: vnode.attrs.projectId, listId: vnode.attrs.listId}),
+        ];
+    },
+}
+
+const NewlistButton = {
+    view(vnode) {
+        if (!vnode.attrs.listId) {
+            return null
+        }
+        return m('button.btn.btn-default.btn-sm',
+            {
+                onclick: function() {
+                    m.route.set(`/project/${vnode.attrs.projectId}/list/new`)
+                },
+                title: "Nouvelle liste",
+            },
+            m('i.fa.fa-eraser')
+        )
     },
 }
 
@@ -57,7 +77,7 @@ export default {
     view(vnode) {
         const tickets = Tickets.get()
         return m('div.blocks-container',
-            m(WidgetBox, {class: "widget-color-blue2", id: "select-tickets", title: m(Title)},
+            m(WidgetBox, {class: "widget-color-blue2", id: "select-tickets", title: m(Title, {projectId: vnode.attrs.projectId, listId: vnode.attrs.listId})},
                 m(ListForm),
             ),
             m(WidgetBox, {

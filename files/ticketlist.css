@@ -8,6 +8,9 @@
 #lists-table > table.table {
     width: auto;
 }
+#lists-table > table td:first-child {
+    padding-right: 3em;
+}
 #lists-table > .actions {
     float: right;
 }
@@ -28,4 +31,23 @@
 }
 #select-tickets {
     max-width: 50ex;
+}
+#select-tickets .widget-header h2 {
+    display: flex;
+    justify-content: space-between;
+}
+
+.widget-header-small {
+    padding-right: 10px;
+}
+
+/* remove some annoying "ace CSS" settings */
+#ticketlist-container .form-control, #ticketlist-container select {
+    color: #444;
+}
+#ticketlist-container .btn.btn-sm {
+    border-radius: 6px;
+}
+#ticketlist-container .btn {
+    border-radius: 8px;
 }

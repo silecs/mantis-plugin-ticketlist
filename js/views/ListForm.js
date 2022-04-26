@@ -14,6 +14,7 @@ const FormGroup = {
 const ListContent = {
     view(vnode) {
         return m(FormGroup, {label: "Tickets #"},
+            // TODO Button to sort the ticket numbers? (only if every line is empty or a ticket number)
             m('textarea.form-control', {
                 cols:10,
                 rows:20,

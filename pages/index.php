@@ -8,7 +8,7 @@ layout_page_begin();
 
 <h1>Listes de tickets</h1>
 
-<div id="ticket-list-container"></div>
+<div id="ticketlist-container"></div>
 <hr>
 
 <?php

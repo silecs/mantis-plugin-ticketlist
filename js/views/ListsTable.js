@@ -64,22 +64,6 @@ const RefreshButton = {
     },
 }
 
-const NewlistButton = {
-    view(vnode) {
-        if (!vnode.attrs.listId) {
-            return null
-        }
-        return m('button.btn.btn-default',
-            {
-                onclick: function() {
-                    m.route.set(`/project/${vnode.attrs.projectId}/list/new`)
-                }
-            },
-            [m('i.fa.fa-eraser'), "Nouvelle liste"]
-        )
-    },
-}
-
 export default {
     oninit(vnode) {
         Project.load(vnode.attrs.projectId);
@@ -91,7 +75,6 @@ export default {
         return m('div#lists-table',
             m("div.actions", 
                 m(RefreshButton, {projectId: vnode.attrs.projectId}),
-                m(NewlistButton, {projectId: vnode.attrs.projectId, listId: activeListId}),
             ),
             m(ListsTable),
         );
