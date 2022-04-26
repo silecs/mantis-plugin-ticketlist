@@ -56,6 +56,10 @@
     display: flex;
     justify-content: space-between;
 }
+.ticket-count-0 .widget-box.tickets-block {
+    /* "Ace Admin Theme" uses "!important", so we have to do the same. Sigh... */
+    display: none !important;
+}
 
 .widget-header-small {
     padding-right: 10px;

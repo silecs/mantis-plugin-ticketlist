@@ -78,7 +78,7 @@ export default {
     },
     view(vnode) {
         const tickets = Tickets.get()
-        return m('div.blocks-container',
+        return m(`div.blocks-container.ticket-count-${tickets.length}`,
             m(WidgetBox, {class: "widget-color-blue2", id: "select-tickets", title: m(Title, {projectId: vnode.attrs.projectId, listId: vnode.attrs.listId})},
                 m(ListForm),
             ),
@@ -86,19 +86,20 @@ export default {
                 m(ListConflictBlock),
             ),
             m(WidgetBox, {
+                    class: 'tickets-block',
                     title: `Tickets listés (${tickets.length})`,
-                    footer: m(TimeSpent)
+                    footer: m(TimeSpent),
                 },
                 m(TicketsBlock, {
                     tickets: tickets,
                 }),
             ),
-            m(WidgetBox, {title: `Non validés`},
+            m(WidgetBox, {class: 'tickets-block', title: `Non validés`},
                 m(TicketsBlock, {
                     tickets: tickets.filter(t => t.status <= STATUS_RESOLVED),
                 }),
             ),
-            m(WidgetBox, {title: `Dev non fini`},
+            m(WidgetBox, {class: 'tickets-block', title: `Dev non fini`},
                 m(TicketsBlock, {
                     tickets: tickets.filter(t => t.status < STATUS_RESOLVED),
                 }),
