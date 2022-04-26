@@ -15,9 +15,29 @@
     float: right;
 }
 
+#ticketlist-form .content {
+    display: flex;
+    flex-wrap: nowrap;
+}
 #ticketlist-form .actions {
     display: flex;
     justify-content: space-between;
+}
+.ticket-numbers {
+    display: flex;
+    flex-wrap: wrap;
+}
+.ticket-numbers > span + span {
+    margin-left: 2px;
+}
+.ticket-numbers > span {
+    padding: 2px 6px;
+}
+.ticket-numbers > span.added {
+    background-color: #bdf3bd;
+}
+.ticket-numbers > span.removed {
+    background-color: #f3bdbd;
 }
 
 .blocks-container {

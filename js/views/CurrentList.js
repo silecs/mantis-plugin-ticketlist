@@ -1,6 +1,8 @@
 import m from "mithril"
 import List from "../models/List";
+import ListConflict from "../models/ListConflict";
 import Tickets from "../models/Tickets";
+import ListConflictBlock from "./ListConflict";
 import ListForm from "./ListForm";
 import TicketsBlock from "./TicketsBlock";
 import WidgetBox from "./WidgetBox";
@@ -79,6 +81,9 @@ export default {
         return m('div.blocks-container',
             m(WidgetBox, {class: "widget-color-blue2", id: "select-tickets", title: m(Title, {projectId: vnode.attrs.projectId, listId: vnode.attrs.listId})},
                 m(ListForm),
+            ),
+            ListConflict.isEmpty() ? null : m(WidgetBox, {title: "Conflit avec la version du serveur"},
+                m(ListConflictBlock),
             ),
             m(WidgetBox, {
                     title: `Tickets listés (${tickets.length})`,

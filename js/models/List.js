@@ -1,6 +1,6 @@
 import m from "mithril"
 import Alerts from "./Alerts"
-import Project from "./Project"
+import ListConflict from "./ListConflict"
 
 const emptyList = {
     id: 0,
@@ -91,11 +91,13 @@ export default {
     reset() {
         serverData.content = null
         content = Object.assign({}, emptyList);
+        ListConflict.reset()
     },
     delete() {
         if (content.id === 0) {
             return Promise.reject("La suppression d'une liste non-enregistrée est impossible.");
         }
+        ListConflict.reset()
         return m.request({
             method: "DELETE",
             url: `/plugin.php`,
@@ -118,6 +120,7 @@ export default {
         });
     },
     load(id) {
+        ListConflict.reset()
         if ((typeof id !== 'number') || id <= 0) {
             return Promise.resolve(content)
         }
@@ -149,7 +152,11 @@ export default {
                 content = Object.assign({}, result.content)
                 Alerts.add(`Liste enregistrée sur le serveur)`, 3000)
             }
-            // TODO Handle status 'need-confirm'
+            if (result.status === 'need-confirm') {
+                serverData.content = result.content
+                ListConflict.add(serverData.content, parseIdsText(serverData.content.ids), parseIdsText(content.ids))
+                Alerts.add(`Erreur, la liste du serveur a été modifiée entre temps, ce qui crée un conflit.`, 5000)
+            }
             return result
         }).catch(function(message) {
             Alerts.add(`Erreur en écrivant dans l'api PUT /list:\n${message}`, 0)
