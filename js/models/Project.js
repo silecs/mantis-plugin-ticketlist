@@ -38,7 +38,7 @@ export default {
         }).then(function(result) {
             state.lists = result;
         }).catch(function() {
-            alert(`Erreur en lisant l'api /project/${id}`)
+            Alerts.add(`Erreur en lisant l'api /project/${id}`, 0)
         }).finally(function() {
             loading = null;
         });

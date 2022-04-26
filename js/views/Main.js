@@ -1,4 +1,5 @@
 import m from "mithril"
+import Alerts from "./Alerts"
 import ListsTable from "./ListsTable"
 import CurrentList from "./CurrentList"
 import Project from "../models/Project"
@@ -24,6 +25,7 @@ export default {
             listId = 0
         }
         return m('div',
+            m(Alerts),
             m(ListsTable, {projectId, listId}),
             m(CurrentList, {projectId, listId})
         )

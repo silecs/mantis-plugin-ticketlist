@@ -1,3 +1,10 @@
+#global-alerts {
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    text-align: center;
+}
+
 #lists-table > table.table {
     width: auto;
 }

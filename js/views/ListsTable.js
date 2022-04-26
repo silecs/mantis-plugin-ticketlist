@@ -1,6 +1,8 @@
 import m from "mithril"
+import List from "../models/List";
 import Lists from "../models/Lists"
 import Project from "../models/Project"
+import Tickets from "../models/Tickets";
 
 let activeListId = 0;
 

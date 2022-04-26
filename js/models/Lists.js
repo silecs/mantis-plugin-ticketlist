@@ -28,7 +28,7 @@ export default {
             content = result ?? [];
             return content;
         }).catch(function() {
-            alert(`Erreur en lisant l'api /list (project ${projectId})`)
+            Alerts.add(`Erreur en lisant l'api /list (project ${projectId})`, 0)
         }).finally(function() {
             loading = null;
         });

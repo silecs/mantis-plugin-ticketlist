@@ -34,7 +34,7 @@ function fetchTickets(idsString) {
         content = result ?? [];
         return content;
     }).catch(function() {
-        alert(`Erreur en lisant l'api /ticket (ids ${idsString})`)
+        Alerts.add(`Erreur en lisant l'api /ticket (ids ${idsString})`, 0)
     });
 }
 
@@ -56,7 +56,7 @@ function fetchTicketsTime(idsString, projectId) {
         timeSpent = result ?? null;
         return timeSpent;
     }).catch(function() {
-        alert(`Erreur en lisant l'api /ticket/time (ids ${idsString})`)
+        Alerts.add(`Erreur en lisant l'api /ticket/time (ids ${idsString})`, 0)
     });
 }
 

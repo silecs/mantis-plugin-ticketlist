@@ -1,4 +1,5 @@
 import m from "mithril"
+import Alerts from "./Alerts"
 import Project from "./Project"
 
 const emptyList = {
@@ -87,6 +88,10 @@ export default {
     isLoading() {
         return loading !== null;
     },
+    reset() {
+        serverData.content = null
+        content = Object.assign({}, emptyList);
+    },
     delete() {
         if (content.id === 0) {
             return Promise.reject("La suppression d'une liste non-enregistrée est impossible.");
@@ -104,18 +109,17 @@ export default {
             if (result.status === 'success') {
                 serverData.content = null
                 content = Object.assign({}, emptyList);
+                Alerts.add(`Liste supprimée du serveur)`, 3000)
             }
             return result
         }).catch(function(message) {
             // TODO Handle the error returned by DELETE /list.
-            alert(`Erreur en écrivant dans l'api DELETE /list:\n${message}`)
+            Alerts.add(`Erreur en écrivant dans l'api DELETE /list:\n${message}`, 0)
         });
     },
     load(id) {
-        if (isNaN(id) || (typeof id !== 'number') || id <= 0) {
-            serverData.content = null
-            content = Object.assign({}, emptyList);
-            return Promise.resolve(emptyList)
+        if ((typeof id !== 'number') || id <= 0) {
+            return Promise.resolve(content)
         }
         if (loading === null) {
             loading = fetchList(id)
@@ -143,12 +147,12 @@ export default {
             if (result.status === 'success') {
                 serverData.content = result.content
                 content = Object.assign({}, result.content)
+                Alerts.add(`Liste enregistrée sur le serveur)`, 3000)
             }
             // TODO Handle status 'need-confirm'
             return result
         }).catch(function(message) {
-            // TODO Handle the error returned by PUT /list.
-            alert(`Erreur en écrivant dans l'api PUT /list:\n${message}`)
+            Alerts.add(`Erreur en écrivant dans l'api PUT /list:\n${message}`, 0)
         });
     },
 }

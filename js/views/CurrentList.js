@@ -27,7 +27,7 @@ const Title = {
         return m('span',
             "Sélection ",
             List.hasChanged()
-                ? m('i.fa.fa-exclamation-triangle', {title: "Les modifications locales ne sont pas enregistrées.", style: "color: #800000"})
+                ? m('i.fa.fa-exclamation-triangle', {title: "Les modifications locales ne sont pas encore enregistrées.", style: "color: #800000"})
                 : null,
         );
     },
@@ -35,9 +35,14 @@ const Title = {
 
 function update(projectId, listId) {
     List.setProjectId(projectId)
-    List.load(listId).then(() => {
-        Tickets.load(List.getTicketIds(), List.get().projectId)
-    })
+    if (listId > 0) {
+        List.load(listId).then(() => {
+            Tickets.load(List.getTicketIds(), List.get().projectId)
+        })
+    } else {
+        List.reset()
+        Tickets.load([], projectId)
+    }
 }
 
 export default {

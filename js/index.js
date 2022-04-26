@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rootElement,
         `/project/${projectId}/list/new`, // default route
         {
-            "/project/:projectId/list/:listId": Main,
+            "/project/:projectId/list/:key": Main, // Name ':key' implies new component on value change
         }
     );
 }, false);
