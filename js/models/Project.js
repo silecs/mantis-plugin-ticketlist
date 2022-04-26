@@ -22,6 +22,11 @@ export default {
             // Do not query if the project has not changed.
             return Promise.resolve(content)
         }
+        if (id === 0) {
+            content.id = 0
+            content.name = "Tous les projets"
+            return Promise.resolve(content)
+        }
 
         content.id = id
         content.name = "Chargement…"

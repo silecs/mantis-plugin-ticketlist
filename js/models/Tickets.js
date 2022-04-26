@@ -1,4 +1,5 @@
 import m from "mithril"
+import Alerts from "./Alerts";
 
 let content = []
 
@@ -17,7 +18,7 @@ const loading = {
     xhr: [],
 }
 
-function fetchTickets(idsString) {
+function fetchTickets(idsString, projectId) {
     return m.request({
         method: "GET",
         url: `/plugin.php`,
@@ -25,13 +26,17 @@ function fetchTickets(idsString) {
             page: "TicketList/api",
             action: "ticket",
             id: idsString,
+            projectId,
         },
         withCredentials: true,
         config: function(xhr) {
             loading.xhr.push(xhr)  // needed in order to cancel the request
         },
     }).then(function(result) {
-        content = result ?? [];
+        content = result.tickets ?? [];
+        if (result.message) {
+            Alerts.add(result.message, 5000)
+        }
         return content;
     }).catch(function() {
         Alerts.add(`Erreur en lisant l'api /ticket (ids ${idsString})`, 0)
@@ -94,7 +99,7 @@ export default {
             }
         }
         loading.ids = idsString
-        const requests = [fetchTickets(idsString)];
+        const requests = [fetchTickets(idsString, projectId)];
         if (projectId > 0) {
             requests.push(fetchTicketsTime(idsString, projectId));
         } else {

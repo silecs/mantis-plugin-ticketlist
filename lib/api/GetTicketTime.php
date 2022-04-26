@@ -15,7 +15,10 @@ class GetTicketTime extends Action
     {
         $idList = join(',', $ids);
         $query = new DbQuery();
-        $sql = "SELECT sum(time_tracking) AS total FROM {bugnote} WHERE bug_id in ($idList)";
+        $sql = "SELECT sum(n.time_tracking) AS total FROM {bug} JOIN {bugnote} n ON bug.id = n.bug_id WHERE bug.id in ($idList)";
+        if ($projectId > 0) {
+            $sql .= " AND bug.project_id = {$projectId}";
+        }
         $query->sql($sql);
         $rows = $query->fetch_all();
         if (!$rows) {

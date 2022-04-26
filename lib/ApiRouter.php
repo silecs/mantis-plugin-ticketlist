@@ -93,7 +93,7 @@ class ApiRouter
             return $this->returnError(400, "Missing parameter (comma separated integer list): id");
         }
         $this->setAction(new api\GetTicket());
-        return $this->response->action->run($ids);
+        return $this->response->action->run($ids, Request::readProjectId());
     }
 
     private function dispatchTicketTime()
