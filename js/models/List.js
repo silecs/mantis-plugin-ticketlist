@@ -132,6 +132,7 @@ export default {
             if (content.ids.match(/^[\d,]+$/)) {
                 content.ids = content.ids.replaceAll(',', "\n") + "\n"
             }
+            // TODO Set page title
             return content;
         })
         return loading

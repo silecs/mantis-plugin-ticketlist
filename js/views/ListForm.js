@@ -61,6 +61,7 @@ const SaveButton = {
                     }
                 });
             },
+            // TODO Mécanisme d'écriture forcée en cas de conflit, avec changement du texte du bouton
             title: "Enregistrer cette liste sur le serveur",
             disabled: (l.name === '') || !List.hasChanged(),},
             [m('i.fa.fa-' + (creation ? 'plus' : 'pencil')), " Publier"]
