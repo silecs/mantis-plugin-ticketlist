@@ -53,7 +53,7 @@ const ListTr = {
 
 const RefreshButton = {
     view(vnode) {
-        return m('button.btn.btn-primary',
+        return m('button.btn.btn-primary.btn-sm',
             {
                 onclick: function() {
                     Lists.load(vnode.attrs.projectId);
@@ -73,10 +73,10 @@ export default {
     view(vnode) {
         activeListId = vnode.attrs.listId
         return m('div#lists-table',
-            m("div.actions", 
+            m(ListsTable),
+            m("div.actions",
                 m(RefreshButton, {projectId: vnode.attrs.projectId}),
             ),
-            m(ListsTable),
         );
     },
 }

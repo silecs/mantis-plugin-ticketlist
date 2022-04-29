@@ -5,6 +5,18 @@
     text-align: center;
 }
 
+#ticketlist-container > div {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+    column-gap: 3ex;
+}
+
+#lists-table {
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
 #lists-table > table.table {
     width: auto;
 }
@@ -12,7 +24,7 @@
     padding-right: 3em;
 }
 #lists-table > .actions {
-    float: right;
+    text-align: right;
 }
 
 #ticketlist-form .content {
@@ -47,7 +59,7 @@
 .block {
     flex: auto;
     border: thin solid black;
-    margin: 1ex;
+    margin: 0 1ex 1ex 1ex;
 }
 #select-tickets {
     max-width: 50ex;
