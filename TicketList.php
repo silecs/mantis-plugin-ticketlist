@@ -96,6 +96,7 @@ class TicketListPlugin extends MantisPlugin
         } else {
             $project = ['id' => 0, 'name' => "Tous les projets"];
         }
+        $project['accessLevel'] = (int) access_get_project_level($project['id'], auth_get_current_user_id());
         $data = htmlspecialchars(json_encode($project), ENT_NOQUOTES);
         return <<<EOHTML
             <link rel="stylesheet" type="text/css" href="{$cssPath}" />

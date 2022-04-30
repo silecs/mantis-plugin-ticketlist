@@ -23,8 +23,12 @@
 #lists-table > table td:first-child {
     padding-right: 3em;
 }
-#lists-table > .actions {
-    text-align: right;
+#lists-table > .actions,
+span.actions {
+        text-align: right;
+}
+.actions > .btn + .btn {
+    margin-left: 1ex;
 }
 
 #ticketlist-form .content {

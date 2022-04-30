@@ -1,8 +1,11 @@
 import m from "mithril"
 
+const MANAGER_LEVEL = 70
+
 let content = {
     id: 0,
     name: "Tous les projets",
+    accessLevel: 10,
 }
 
 let loading = null
@@ -10,6 +13,9 @@ let loading = null
 export default {
     get() {
         return content;
+    },
+    hasManagerRights() {
+        return (content.accessLevel ?? 10) >= MANAGER_LEVEL;
     },
     isLoading() {
         return loading !== null;

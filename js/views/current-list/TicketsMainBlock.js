@@ -1,15 +1,21 @@
 import m from "mithril"
 import List from "../../models/List";
+import Project from "../../models/Project";
 import Tickets from "../../models/Tickets";
 import TicketsTable from "./TicketsTable";
 import WidgetBox from "./WidgetBox";
+
+let massCloseMode = false
 
 const BlockTitle = {
     view(vnode) {
         const tickets = Tickets.get()
         return [
             `Tickets listés (${tickets.length})`,
-            m(RefreshButton, {num: tickets.length}),
+            m('span.actions',
+                m(RefreshButton, {num: tickets.length}),
+                Project.hasManagerRights() ? m(ToggleMassCloseButton, {num: tickets.length}) : null,
+            ),
         ];
     },
 }
@@ -38,6 +44,44 @@ const RefreshButton = {
     },
 }
 
+const ToggleMassCloseButton = {
+    view(vnode) {
+        if (vnode.attrs.num == 0) {
+            // No ticket to select
+            return null
+        }
+        return m('button',
+            {
+                class: 'btn btn-default btn-sm' + (massCloseMode ? ' active' : ''),
+                title: "Activer le mode pour sélectionner des tickets et les fermer d'ensemble",
+                type: 'button',
+                onclick: () => {
+                    massCloseMode = !massCloseMode
+                },
+            },
+            m('i.fa.fa-wrench')
+        )
+    },
+}
+
+const MassCloseButton = {
+    view(vnode) {
+        if (!massCloseMode) {
+            return null
+        }
+        const ids = vnode.attrs.selection
+        return m('a',
+            {
+                class: 'btn btn-danger',
+                title: "Ouvrir un formulaire pour fermer simultanément les tickets sélectionnés",
+                href: '/plugin.php?page=TicketList/close&ids=' + ids.join(","),
+                disabled: (ids.length === 0),
+            },
+            "Fermer…"
+        )
+    },
+}
+
 const TimeSpent = {
     view(vnode) {
         const timeSpent = Tickets.getTimeSpent()
@@ -54,16 +98,27 @@ const TimeSpent = {
 }
 
 export default {
+    selection: [],
+    oninit() {
+        this.selection = []
+    },
     view(vnode) {
         const tickets = Tickets.get()
         return m(WidgetBox, {
+                id: 'issues-main-table',
                 class: 'tickets-block',
                 title: m(BlockTitle),
                 footer: m(TimeSpent),
             },
-            m(TicketsTable, {
-                tickets: tickets,
-            }),
+            [
+                m(TicketsTable, {
+                    tickets: tickets,
+                    selectable: massCloseMode ? this.selection : null,
+                }),
+                m('div.actions', {style: "text-align: right"},
+                    m(MassCloseButton, {selection: this.selection}),
+                ),
+            ]
         );
     },
 }

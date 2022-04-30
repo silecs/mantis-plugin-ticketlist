@@ -18,8 +18,12 @@ class GetProject extends Action
         $row = $query->fetch();
 
         if (!$row) {
-            throw new HttpException(404, "Liste non trouvée.");
+            throw new HttpException(404, "Projet non trouvé.");
         }
-        return $row;
+        return [
+            'id' => (int) $row['id'],
+            'name' => $row['name'],
+            'accessLevel' => (int) access_get_project_level($id, auth_get_current_user_id()),
+        ];
     }
 }
