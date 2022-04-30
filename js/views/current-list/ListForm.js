@@ -1,7 +1,6 @@
 import m from "mithril"
-import List from "../models/List";
-import ListConflict from "./ListConflict";
-import Tickets from "../models/Tickets";
+import List from "../../models/List";
+import Tickets from "../../models/Tickets";
 
 const FormGroup = {
     view(vnode) {

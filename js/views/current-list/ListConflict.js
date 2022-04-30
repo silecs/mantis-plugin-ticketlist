@@ -1,5 +1,5 @@
 import m from "mithril"
-import ListConflict from "../models/ListConflict"
+import ListConflict from "../../models/ListConflict"
 
 const TicketsDiff = {
     view(vnode) {
