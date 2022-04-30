@@ -1,7 +1,7 @@
 import m from "mithril"
 import List from "../../models/List";
 import Tickets from "../../models/Tickets";
-import TicketsBlock from "./TicketsBlock";
+import TicketsTable from "./TicketsTable";
 import WidgetBox from "./WidgetBox";
 
 const BlockTitle = {
@@ -61,7 +61,7 @@ export default {
                 title: m(BlockTitle),
                 footer: m(TimeSpent),
             },
-            m(TicketsBlock, {
+            m(TicketsTable, {
                 tickets: tickets,
             }),
         );

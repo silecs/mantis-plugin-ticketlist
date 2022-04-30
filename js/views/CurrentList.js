@@ -5,7 +5,7 @@ import Tickets from "../models/Tickets";
 
 import ListBlock from "./current-list/ListBlock";
 import ListConflictBlock from "./current-list/ListConflict";
-import TicketsBlock from "./current-list/TicketsBlock";
+import TicketsTable from "./current-list/TicketsTable";
 import TicketsMainBlock from "./current-list/TicketsMainBlock";
 import WidgetBox from "./current-list/WidgetBox";
 
@@ -27,7 +27,7 @@ export default {
                     class: 'tickets-block',
                     title: `Non validés`,
                 },
-                m(TicketsBlock, {
+                m(TicketsTable, {
                     tickets: tickets.filter(t => t.status <= STATUS_RESOLVED),
                 }),
             ),
@@ -35,7 +35,7 @@ export default {
                     class: 'tickets-block',
                     title: `Dev non fini`,
                 },
-                m(TicketsBlock, {
+                m(TicketsTable, {
                     tickets: tickets.filter(t => t.status < STATUS_RESOLVED),
                 }),
             ),
