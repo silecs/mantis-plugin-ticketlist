@@ -49,6 +49,7 @@ const NewlistButton = {
                     m.route.set(`/project/${vnode.attrs.projectId}/list/new`)
                 },
                 title: "Nouvelle liste",
+                type: 'button',
             },
             m('i.fa.fa-eraser')
         )

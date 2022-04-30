@@ -55,9 +55,10 @@ const RefreshButton = {
     view(vnode) {
         return m('button.btn.btn-primary.btn-sm',
             {
+                type: 'button',
                 onclick: function() {
                     Lists.load(vnode.attrs.projectId);
-                }
+                },
             },
             [m('i.fa.fa-refresh'), " Rafraîchir"]
         );
