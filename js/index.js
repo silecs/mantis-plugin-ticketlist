@@ -1,7 +1,7 @@
 import m from "mithril"
 import Project from "./models/Project"
 import Main from "./views/Main"
-import MainByIds from "./views/MainByIds"
+import MainByName from "./views/MainByName"
 
 document.addEventListener('DOMContentLoaded', function() {
     // Default project is defined in the static HTML
@@ -17,8 +17,14 @@ document.addEventListener('DOMContentLoaded', function() {
         rootElement,
         `/project/${projectId}/list/new`, // default route
         {
-            "/project/:projectId/list/:key": Main, // Name ':key' implies new component on value change
-            "/project/:projectId/new/:issueIds": MainByIds,
+            // Name ':key' implies new component on value change
+            // Optional URL param 'issueIds'
+            "/project/:projectId/list/:key": Main,
+
+            // Identify a list by its name instead of its ID,
+            // then redirect, forwarding the URL param 'issueIds'.
+            "/project/:projectId/name/:listName": MainByName,
+
             // TODO Add a route for operations on issues (closing and setting a release)
         }
     );

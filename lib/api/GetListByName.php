@@ -7,19 +7,20 @@ use DbQuery;
 use ticketlist\HttpException;
 
 /**
- * Response to GET /list/8
+ * Response to GET /list?name=X
  */
-class GetList extends Action
+class GetListByName extends Action
 {
-    public function run(int $id)
+    public function run(string $name, int $projectId)
     {
         $query = new DbQuery();
         $tableName = plugin_table('persistent');
-        $query->sql("SELECT * FROM {$tableName} WHERE id = {$id}");
+        $query->sql("SELECT * FROM {$tableName} WHERE name = :name AND project_id = {$projectId} LIMIT 1");
+        $query->execute(['name' => $name]);
         $row = $query->fetch();
 
         if (!$row) {
-            throw new HttpException(404, "Liste non trouvée.");
+            throw new HttpException(404, "Liste non trouvée. SELECT * FROM {$tableName} WHERE name = '$name' AND project_id = {$projectId} LIMIT 1");
         }
         return [
             'id' => (int) $row['id'],

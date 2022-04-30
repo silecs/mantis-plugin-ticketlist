@@ -18,7 +18,7 @@ const serverData = {
 
 let loading = null
 
-function fetchList(id) {
+function fetchListById(id) {
     return m.request({
         method: "GET",
         url: `/plugin.php`,
@@ -125,7 +125,7 @@ export default {
             return Promise.resolve(content)
         }
         if (loading === null) {
-            loading = fetchList(id)
+            loading = fetchListById(id)
         }
         loading.then(function(result) {
             content = Object.assign({}, serverData.content ?? emptyList);

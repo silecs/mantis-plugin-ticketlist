@@ -76,27 +76,7 @@ const NewlistButton = {
     },
 }
 
-function update(projectId, listId) {
-    List.setProjectId(projectId)
-    if (listId > 0) {
-        List.load(listId).then(() => {
-            Tickets.load(List.getTicketIds(), List.get().projectId)
-        })
-    } else {
-        List.reset()
-        Tickets.load([], projectId)
-    }
-}
-
 export default {
-    oninit(vnode) {
-        update(vnode.attrs.projectId, vnode.attrs.listId)
-    },
-    onbeforeupdate(vnode, oldVnode) {
-        if (oldVnode.attrs.listId !== vnode.attrs.listId) {
-            update(vnode.attrs.projectId, vnode.attrs.listId)
-        }
-    },
     view(vnode) {
         const tickets = Tickets.get()
         return m(`div.blocks-container.ticket-count-${tickets.length}`,
