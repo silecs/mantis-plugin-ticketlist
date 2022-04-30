@@ -52,21 +52,21 @@
     background-color: #f3bdbd;
 }
 
-.blocks-container {
+#ticketlist-container .blocks-container {
     display: flex;
     flex-wrap: wrap;
 }
-.block {
+#ticketlist-container .block {
     flex: auto;
     border: thin solid black;
     margin: 0 1ex 1ex 1ex;
 }
-#select-tickets {
-    max-width: 50ex;
-}
-#select-tickets .widget-header h2 {
+#ticketlist-container .widget-header h2 {
     display: flex;
     justify-content: space-between;
+}
+#select-tickets {
+    max-width: 50ex;
 }
 .ticket-count-0 .widget-box.tickets-block {
     /* "Ace Admin Theme" uses "!important", so we have to do the same. Sigh... */
