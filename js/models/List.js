@@ -62,6 +62,11 @@ function parseIdsText(str) {
     return ids
 }
 
+function updatePageTitle() {
+    const siteName = document.querySelector('#navbar-container .navbar-brand').textContent
+    document.title = content.name + ' | ' + siteName
+}
+
 export default {
     get() {
         return content;
@@ -132,7 +137,7 @@ export default {
             if (content.ids.match(/^[\d,]+$/)) {
                 content.ids = content.ids.replaceAll(',', "\n") + "\n"
             }
-            // TODO Set page title
+            updatePageTitle()
             return content;
         })
         return loading
@@ -151,6 +156,7 @@ export default {
             if (result.status === 'success') {
                 serverData.content = result.content
                 content = Object.assign({}, result.content)
+                updatePageTitle()
                 Alerts.add(`Liste enregistrée sur le serveur)`, 3000)
             }
             if (result.status === 'need-confirm') {
