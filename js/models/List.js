@@ -18,7 +18,7 @@ const serverData = {
 
 let loading = null
 
-function fetchList(id) {
+function fetchListById(id) {
     return m.request({
         method: "GET",
         url: `/plugin.php`,
@@ -60,6 +60,11 @@ function parseIdsText(str) {
         }
     }
     return ids
+}
+
+function updatePageTitle() {
+    const siteName = document.querySelector('#navbar-container .navbar-brand').textContent
+    document.title = content.name + ' | ' + siteName
 }
 
 export default {
@@ -125,13 +130,14 @@ export default {
             return Promise.resolve(content)
         }
         if (loading === null) {
-            loading = fetchList(id)
+            loading = fetchListById(id)
         }
         loading.then(function(result) {
             content = Object.assign({}, serverData.content ?? emptyList);
             if (content.ids.match(/^[\d,]+$/)) {
                 content.ids = content.ids.replaceAll(',', "\n") + "\n"
             }
+            updatePageTitle()
             return content;
         })
         return loading
@@ -150,6 +156,7 @@ export default {
             if (result.status === 'success') {
                 serverData.content = result.content
                 content = Object.assign({}, result.content)
+                updatePageTitle()
                 Alerts.add(`Liste enregistrée sur le serveur)`, 3000)
             }
             if (result.status === 'need-confirm') {

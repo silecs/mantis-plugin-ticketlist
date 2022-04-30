@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/ActionOnIssue.php';
+namespace ticketlist;
 
 require_api('access_api.php'); // access_* functions
 require_api('bug_api.php'); // bug_* functions
@@ -40,7 +40,7 @@ class IssueList
         foreach ($this->bugs as $bug) {
             $ids[] = $bug->id;
         }
-        sort($ids, SORT_NUMERIC);
+        //sort($ids, SORT_NUMERIC);
         return $ids;
     }
 
@@ -65,7 +65,7 @@ class IssueList
     {
         foreach ($this->bugs as $bug) {
             if (!$action->applyTo($bug)) {
-                $this->failures[$bug->id] = lang_get($action->getLastFailure());
+                $this->failures[$bug->id] = \lang_get($action->getLastFailure());
             }
         }
     }
@@ -77,10 +77,10 @@ class IssueList
 
     private function loadIssuesFromIds(array $bugIds): void
     {
-        bug_cache_array_rows($bugIds);
+        \bug_cache_array_rows($bugIds);
         foreach ($bugIds as $id) {
-            bug_ensure_exists($id);
-            access_ensure_bug_level(config_get('view_bug_threshold'), $id);
+            \bug_ensure_exists($id);
+            \access_ensure_bug_level(config_get('view_bug_threshold'), $id);
             $this->bugs[$id] = bug_get($id, true);
         }
     }

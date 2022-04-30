@@ -6,8 +6,6 @@ use DbQuery;
 
 /**
  * Response to GET /ticket/time/2029,5044
- *
- * TODO Filter the bug list according to permissions.
  */
 class GetTicketTime extends Action
 {

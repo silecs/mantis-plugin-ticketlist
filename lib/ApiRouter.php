@@ -50,6 +50,11 @@ class ApiRouter
                 $this->setAction(new api\GetList());
                 return $this->response->action->run($id);
             }
+            $name = \rawurldecode($_GET['name'] ?? '');
+            if ($name) {
+                $this->setAction(new api\GetListByName());
+                return $this->response->action->run($name, Request::readProjectId());
+            }
             $this->setAction(new api\GetListAll());
             return $this->response->action->run(Request::readProjectId());
         }

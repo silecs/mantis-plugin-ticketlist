@@ -1,7 +1,6 @@
 import m from "mithril"
-import List from "../models/List";
-import ListConflict from "./ListConflict";
-import Tickets from "../models/Tickets";
+import List from "../../models/List";
+import Tickets from "../../models/Tickets";
 
 const FormGroup = {
     view(vnode) {
@@ -61,6 +60,7 @@ const SaveButton = {
                     }
                 });
             },
+            // TODO Mécanisme d'écriture forcée en cas de conflit, avec changement du texte du bouton
             title: "Enregistrer cette liste sur le serveur",
             disabled: (l.name === '') || !List.hasChanged(),},
             [m('i.fa.fa-' + (creation ? 'plus' : 'pencil')), " Publier"]

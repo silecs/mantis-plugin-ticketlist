@@ -1,5 +1,9 @@
 <?php
 
+namespace ticketlist;
+
+use BugData;
+
 require_api('access_api.php'); // access_* functions
 require_api('bug_api.php');
 require_api('config_api.php');

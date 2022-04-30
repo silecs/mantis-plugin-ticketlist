@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__DIR__) . '/lib/IssueList.php';
+use ticketlist\IssueList;
 
 require_api('lang_api.php');
 require_api('version_api.php');
@@ -12,7 +12,7 @@ helper_begin_long_process();
 if (isset($_POST['ids'])) {
     $issues = IssueList::fromString($_POST['ids']);
 } elseif (isset($_GET['ids'])) {
-    $issues = IssueList::fromArray($_GET['ids']);
+    $issues = IssueList::fromString($_GET['ids']);
 } else {
     echo "The bug list is missing. Go away.";
     return;

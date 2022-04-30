@@ -53,11 +53,12 @@ const ListTr = {
 
 const RefreshButton = {
     view(vnode) {
-        return m('button.btn.btn-primary',
+        return m('button.btn.btn-primary.btn-sm',
             {
+                type: 'button',
                 onclick: function() {
                     Lists.load(vnode.attrs.projectId);
-                }
+                },
             },
             [m('i.fa.fa-refresh'), " Rafraîchir"]
         );
@@ -73,10 +74,10 @@ export default {
     view(vnode) {
         activeListId = vnode.attrs.listId
         return m('div#lists-table',
-            m("div.actions", 
+            m(ListsTable),
+            m("div.actions",
                 m(RefreshButton, {projectId: vnode.attrs.projectId}),
             ),
-            m(ListsTable),
         );
     },
 }

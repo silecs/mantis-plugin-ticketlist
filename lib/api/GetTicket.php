@@ -49,7 +49,7 @@ class GetTicket extends Action
             $tickets[] = [
                 'id' => (int) $row['id'],
                 'status' => (int) $row['status'],
-                'statusTxt' => $toFrStatus[(int) $row['status']],
+                'statusText' => $toFrStatus[(int) $row['status']],
                 'summary' => $row['summary'],
                 'link' => \string_get_bug_view_link((int) $row['id'], null, false)
             ];

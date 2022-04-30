@@ -1,106 +1,41 @@
 import m from "mithril"
-import List from "../models/List";
+
 import ListConflict from "../models/ListConflict";
 import Tickets from "../models/Tickets";
-import ListConflictBlock from "./ListConflict";
-import ListForm from "./ListForm";
-import TicketsBlock from "./TicketsBlock";
-import WidgetBox from "./WidgetBox";
+
+import ListBlock from "./current-list/ListBlock";
+import ListConflictBlock from "./current-list/ListConflict";
+import TicketsTable from "./current-list/TicketsTable";
+import TicketsMainBlock from "./current-list/TicketsMainBlock";
+import WidgetBox from "./current-list/WidgetBox";
 
 const STATUS_RESOLVED = 80
 
-const TimeSpent = {
-    view(vnode) {
-        const timeSpent = Tickets.getTimeSpent()
-        if (!timeSpent || !timeSpent.minutes) {
-            return null
-        }
-        return m('div', 
-            `Temps total consacré à ces tickets : ${timeSpent.time}`,
-            timeSpent.minutes > 0 && timeSpent.release && timeSpent.release.name
-                ? ["dont ", m('strong', timeSpent.timeSinceRelease), " depuis la livraison ", m('em', timeSpent.release.name)]
-                : null
-        );
-    },
-}
-
-const Title = {
-    view(vnode) {
-        return [
-            m('span',
-                "Sélection ",
-                List.hasChanged()
-                    ? m('i.fa.fa-exclamation-triangle', {title: "Les modifications locales ne sont pas encore enregistrées.", style: "color: #800000"})
-                    : null,
-            ),
-            m(NewlistButton, {projectId: vnode.attrs.projectId, listId: vnode.attrs.listId}),
-        ];
-    },
-}
-
-const NewlistButton = {
-    view(vnode) {
-        if (!vnode.attrs.listId) {
-            return null
-        }
-        return m('button.btn.btn-default.btn-sm',
-            {
-                onclick: function() {
-                    m.route.set(`/project/${vnode.attrs.projectId}/list/new`)
-                },
-                title: "Nouvelle liste",
-            },
-            m('i.fa.fa-eraser')
-        )
-    },
-}
-
-function update(projectId, listId) {
-    List.setProjectId(projectId)
-    if (listId > 0) {
-        List.load(listId).then(() => {
-            Tickets.load(List.getTicketIds(), List.get().projectId)
-        })
-    } else {
-        List.reset()
-        Tickets.load([], projectId)
-    }
-}
-
 export default {
-    oninit(vnode) {
-        update(vnode.attrs.projectId, vnode.attrs.listId)
-    },
-    onbeforeupdate(vnode, oldVnode) {
-        if (oldVnode.attrs.listId !== vnode.attrs.listId) {
-            update(vnode.attrs.projectId, vnode.attrs.listId)
-        }
-    },
     view(vnode) {
         const tickets = Tickets.get()
         return m(`div.blocks-container.ticket-count-${tickets.length}`,
-            m(WidgetBox, {class: "widget-color-blue2", id: "select-tickets", title: m(Title, {projectId: vnode.attrs.projectId, listId: vnode.attrs.listId})},
-                m(ListForm),
-            ),
+            m(ListBlock, {
+                projectId: vnode.attrs.projectId,
+                listId: vnode.attrs.listId,
+            }),
             ListConflict.isEmpty() ? null : m(WidgetBox, {title: "Conflit avec la version du serveur"},
                 m(ListConflictBlock),
             ),
+            m(TicketsMainBlock),
             m(WidgetBox, {
                     class: 'tickets-block',
-                    title: `Tickets listés (${tickets.length})`,
-                    footer: m(TimeSpent),
+                    title: `Non validés`,
                 },
-                m(TicketsBlock, {
-                    tickets: tickets,
-                }),
-            ),
-            m(WidgetBox, {class: 'tickets-block', title: `Non validés`},
-                m(TicketsBlock, {
+                m(TicketsTable, {
                     tickets: tickets.filter(t => t.status <= STATUS_RESOLVED),
                 }),
             ),
-            m(WidgetBox, {class: 'tickets-block', title: `Dev non fini`},
-                m(TicketsBlock, {
+            m(WidgetBox, {
+                    class: 'tickets-block',
+                    title: `Dev non fini`,
+                },
+                m(TicketsTable, {
                     tickets: tickets.filter(t => t.status < STATUS_RESOLVED),
                 }),
             ),
