@@ -46,9 +46,40 @@ const ListTr = {
             m('td',
                 m(m.route.Link, {href: `/project/${l.project_id}/list/${l.id}`}, l.name)
             ),
-            m('td', l.last_update),
+            m('td', m(DateTime, {date: l.last_update})),
         );
     }
+}
+
+const DateTime = {
+    format(date) {
+        if (!(date instanceof Date)) {
+            return ""
+        }
+        return date.toISOString().substring(0, 16).replace('T', ' ')
+    },
+    isRecent(date) {
+        if (!(date instanceof Date)) {
+            return null
+        }
+        const millis = Date.now() - date;
+        return (millis < 86400000)
+    },
+    parseIsoDate(str) {
+        // Date.parse() is browser dependent and its usage discouraged (source MDN).
+        const m = str.split(/[^\d]/)
+        if (!m || m.length < 6) {
+            return null
+        }
+        return new Date(m[0], m[1] - 1, m[2], m[3], m[4], m[5])
+    },
+    view(vnode) {
+        const ts = this.parseIsoDate(vnode.attrs.date)
+        if (ts === null) {
+            return null
+        }
+        return this.isRecent(ts) ? m('strong', this.format(ts)) : this.format(ts);
+    },
 }
 
 const RefreshButton = {
