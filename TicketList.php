@@ -1,14 +1,15 @@
 <?php
 
+require_once __DIR__ . '/EventHooks.php';
+
 /**
+ * Overloads some of the parent's methods in order to define the plugin.
+ *
  * @author François Gannaz <francois.gannaz@silecs.info>
  */
 class TicketListPlugin extends MantisPlugin
 {
-    /**
-     * @var string
-     */
-    public $nonce;
+    use EventHooks;
 
     /**
      * Init the plugin attributes.
@@ -16,8 +17,8 @@ class TicketListPlugin extends MantisPlugin
     public function register()
     {
         $this->name = 'Ticket List';
-        $this->description = "Plugin that displays the state of a list of tickets.";
-        $this->page = 'list';
+        $this->description = "Plugin that displays the state of a list of issues.";
+        $this->page = 'index';
 
         $this->version = '2.1';
         $this->requires = [
@@ -27,9 +28,10 @@ class TicketListPlugin extends MantisPlugin
         $this->author = 'François Gannaz / Silecs';
         $this->contact = 'francois.gannaz@silecs.info';
         $this->url = '';
+    }
 
-        $this->nonce = crypto_generate_uri_safe_nonce(16);
-
+    public function init()
+    {
         // Autoload classes whose FQDN is ticketlist\**
         spl_autoload_register(function ($className) {
             if (strncmp($className, 'ticketlist\\', 11) === 0) {
@@ -48,6 +50,7 @@ class TicketListPlugin extends MantisPlugin
     {
         // Event hooks must be public methods of this plugin object.
         // They will be called from an external function.
+        // See the trait EventHooks for the hook methods.
         return [
             'EVENT_CORE_HEADERS' => 'onBeforeOutput',
             'EVENT_MENU_MAIN' => 'onMenu',
@@ -55,58 +58,14 @@ class TicketListPlugin extends MantisPlugin
         ];
     }
 
-    public function onBeforeOutput(): void
-    {
-        global $g_bypass_headers;
-        if ($this->isPluginRequested("index")) {
-            $this->addHttpHeaders();
-        }
-        if ($this->isPluginRequested("api")) {
-            // Hidden global setting, found by reverse engineering this junk of Mantis.
-            $g_bypass_headers = true;
-        }
-    }
-
     /**
-     * Add entries to the menu on the page "Summary".
-     */
-    public function onMenu(): array
-    {
-        return [
-            [
-                'title' => "Lister des tickets",
-                'url' => plugin_page('index'),
-                'access_level' => ANYBODY,
-                'icon' => 'fa-list'
-            ],
-        ];
-    }
-
-    public function addHtmlHeadContent(): string
-    {
-        if (!$this->isPluginRequested("index")) {
-            return '';
-        }
-        $cssPath = htmlspecialchars(plugin_file('ticketlist.css'));
-        $jsPath = htmlspecialchars(plugin_file('main.js')); // json_encode(plugin_page('list'));
-        $projectId = (int) helper_get_current_project();
-        if ($projectId > 0) {
-            $record = project_get_row($projectId);
-            $project = ['id' => (int) $record['id'], 'name' => $record['name']];
-        } else {
-            $project = ['id' => 0, 'name' => "Tous les projets"];
-        }
-        $project['accessLevel'] = (int) access_get_project_level($project['id'], auth_get_current_user_id());
-        $data = htmlspecialchars(json_encode($project), ENT_NOQUOTES);
-        return <<<EOHTML
-            <link rel="stylesheet" type="text/css" href="{$cssPath}" />
-            <script id="ticket-list-data" type="application/json">{$data}</script>
-            <script src="{$jsPath}"></script>
-            EOHTML;
-    }
-
-    /**
-     * Undocumented method that defines the SQL schema of new tables.
+     * Define the SQL schema of new tables.
+     *
+     * This is not mentionned in the official documentation,
+     * but appears in the parent class, MantisPlugin.
+     *
+     * I guess it is called at install time, and not for upgrades.
+     * But I haven't reverse engineered its usage.
      */
     public function schema() {
         return [
@@ -125,31 +84,12 @@ class TicketListPlugin extends MantisPlugin
                     author_id          I       DEFAULT NULL UNSIGNED,
                     last_update        T
                     EOTEXT
-                ]
+                ],
             ],
+            [
+                'CreateIndexSQL',
+                ['persistent_name_u', plugin_table('persistent'), 'project_id, name', ['UNIQUE']],
+            ]
         ];
-    }
-
-    /**
-     * Add Content Security Policy headers for our script.
-     */
-    private function addHttpHeaders(): void
-    {
-        $hash = hash_file('sha256', __DIR__ . '/files/main.js');
-        http_csp_add('script-src', "'sha256-{$hash}'");
-    }
-
-    private function isPluginRequested(string $page = ''): bool
-    {
-        if (strpos($_SERVER['REQUEST_URI'], "plugin.php") === false) {
-            return false;
-        }
-        $pageRequested = $_GET['page'] ?? '';
-        if ($page) {
-            return ($pageRequested === "TicketList/$page")
-                || (strpos($pageRequested, "TicketList/$page/") === 0);
-        } else {
-            return (strncmp($page, 'TicketList', 10) === 0);
-        }
     }
 }
