@@ -15,5 +15,8 @@
   "scripts": {
     "build": "webpack build --mode production --entry ./js/index.js --output-path ./files/",
     "dev": "webpack --mode development --devtool source-map --watch --entry ./js/index.js --output-path ./files/"
+  },
+  "devDependencies": {
+    "eslint": "^8.14.0"
   }
 }
