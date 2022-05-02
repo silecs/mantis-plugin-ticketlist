@@ -11,7 +11,7 @@ export default {
         return conflict
     },
     isEmpty() {
-        return !conflict.hasOwnProperty('serverList')
+        return !Object.hasOwn(conflict, 'serverList')
     },
     reset() {
         conflict = {}

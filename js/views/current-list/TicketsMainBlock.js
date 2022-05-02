@@ -9,7 +9,7 @@ let massCloseMode = false
 
 const BlockTitle = {
     view(vnode) {
-        const tickets = Tickets.get()
+        const tickets = vnode.attrs.tickets
         return [
             `Tickets listés (${tickets.length})`,
             m('span.actions',
@@ -23,7 +23,7 @@ const BlockTitle = {
 const RefreshButton = {
     loading: false,
     view(vnode) {
-        if (vnode.attrs.num == 0) {
+        if (vnode.attrs.num === 0) {
             return null
         }
         return m('button',
@@ -46,7 +46,7 @@ const RefreshButton = {
 
 const ToggleMassCloseButton = {
     view(vnode) {
-        if (vnode.attrs.num == 0) {
+        if (vnode.attrs.num === 0) {
             // No ticket to select
             return null
         }
@@ -83,7 +83,7 @@ const MassCloseButton = {
 }
 
 const TimeSpent = {
-    view(vnode) {
+    view() {
         const timeSpent = Tickets.getTimeSpent()
         if (!timeSpent || !timeSpent.minutes) {
             return null
@@ -102,12 +102,12 @@ export default {
     oninit() {
         this.selection = []
     },
-    view(vnode) {
+    view() {
         const tickets = Tickets.get()
         return m(WidgetBox, {
                 id: 'issues-main-table',
                 class: 'tickets-block',
-                title: m(BlockTitle),
+                title: m(BlockTitle, {tickets}),
                 footer: m(TimeSpent),
             },
             [

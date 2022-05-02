@@ -9,7 +9,7 @@ import Tickets from "../models/Tickets"
 function updateList(projectId, k) {
     List.setProjectId(projectId)
 
-    let listId = parseInt(k, 10)
+    const listId = parseInt(k, 10)
     if (isNaN(listId) || listId < 0) {
         List.reset()
         return Tickets.load([], projectId)
