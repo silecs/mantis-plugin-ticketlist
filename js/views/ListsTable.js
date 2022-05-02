@@ -1,10 +1,9 @@
 import m from "mithril"
-import List from "../models/List";
 import Lists from "../models/Lists"
 import Project from "../models/Project"
-import Tickets from "../models/Tickets";
 
 let activeListId = 0;
+let sortColumn = 'name'
 
 const ListsTable = {
     view(vnode) {
@@ -14,8 +13,10 @@ const ListsTable = {
         return m('table.table.table-striped.table-bordered.table-condensed',
             m('thead',
                 m('tr',
-                    m('th', Project.get().name + " - listes"),
-                    m('th', "Dernière modification")
+                    m('th', {onclick() { sortColumn = 'name' }, style: "cursor: pointer;"},
+                        Project.get().name + " - listes"),
+                    m('th', {onclick() { sortColumn = 'date' }, style: "cursor: pointer;"},
+                        "Dernière modification")
                 ),
             ),
             m(ListBody),
@@ -25,11 +26,14 @@ const ListsTable = {
 
 const ListBody = {
     view() {
-        const lists = Lists.get()
+        const lists = Array.from(Lists.get()) // In-place sort must not change the list.
         if (!lists || lists.length === 0) {
             return m('tbody', 
                 m('tr[colspan=2]', m('em', "Aucune liste n'est enregistrée sur le serveur."))
             );
+        }
+        if (sortColumn === 'date') {
+            lists.sort((a, b) => (a.last_update < b.last_update ? 1 : -1))
         }
         return m('tbody',
             lists.map(function (l) {
