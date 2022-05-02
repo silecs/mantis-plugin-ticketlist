@@ -24,8 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Identify a list by its name instead of its ID,
             // then redirect, forwarding the URL param 'issueIds'.
             "/project/:projectId/name/:listName": MainByName,
-
-            // TODO Add a route for operations on issues (closing and setting a release)
         }
     );
 }, false);

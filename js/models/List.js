@@ -157,7 +157,7 @@ export default {
                 serverData.content = result.content
                 content = Object.assign({}, result.content)
                 updatePageTitle()
-                Alerts.add(`Liste enregistrée sur le serveur)`, 3000)
+                Alerts.add(`Liste enregistrée sur le serveur`, 3000)
             }
             if (result.status === 'need-confirm') {
                 serverData.content = result.content

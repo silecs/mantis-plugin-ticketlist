@@ -1,5 +1,6 @@
 import m from "mithril"
 import List from "../../models/List";
+import Lists from "../../models/Lists";
 import Tickets from "../../models/Tickets";
 
 const FormGroup = {
@@ -57,6 +58,8 @@ const SaveButton = {
                     if (creation) {
                         const newList = result.content
                         m.route.set(`/project/${newList.projectId}/list/${newList.id}`)
+                    } else {
+                        Lists.load(result.content.projectId)
                     }
                 });
             },
