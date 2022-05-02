@@ -1,4 +1,5 @@
 import m from "mithril"
+import Alerts from "./Alerts"
 
 const MANAGER_LEVEL = 70
 
@@ -47,7 +48,7 @@ export default {
             },
             withCredentials: true,
         }).then(function(result) {
-            state.lists = result;
+            content = result;
         }).catch(function() {
             Alerts.add(`Erreur en lisant l'api /project/${id}`, 0)
         }).finally(function() {

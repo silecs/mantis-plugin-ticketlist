@@ -20,7 +20,7 @@ const ListContent = {
                 cols:10,
                 rows:20,
                 placeholder: "Pour les lignes commençant par un numéro de ticket, tous les tickets référencés dans le texte sont affichés.\n\nLe reste est vu comme un commentaire.",
-                oninput(event) {
+                oninput() {
                     List.setText(this.value)
                     const ticketIds = List.getTicketIds()
                     if (Tickets.hasChanged(ticketIds)) {

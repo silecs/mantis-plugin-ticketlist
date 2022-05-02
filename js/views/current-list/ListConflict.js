@@ -6,13 +6,13 @@ const TicketsDiff = {
         const before = vnode.attrs.before
         const after = vnode.attrs.after
         const all = new Set(before)
-        for (let x of after) {
+        for (const x of after) {
             if (!all.has(x)) {
                 all.add(x)
             }
         }
         const result = []
-        for(let x of all) {
+        for(const x of all) {
             if (before.includes(x)) {
                 if (after.includes(x)) {
                     result.push(m('span', {title: "Ticket présent sur le serveur et en local"}, x))
@@ -30,7 +30,7 @@ const TicketsDiff = {
 export default {
     view() {
         const conflict = ListConflict.get()
-        if (!conflict.hasOwnProperty('serverList')) {
+        if (!Object.hasOwn(conflict, 'serverList')) {
             return null
         }
         return m('div#list-conflict',

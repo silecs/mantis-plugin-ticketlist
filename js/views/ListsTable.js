@@ -46,7 +46,7 @@ const ListBody = {
 const ListTr = {
     view(vnode) {
         const l = vnode.attrs.list
-        return m('tr', (l.id == activeListId ? {class: "info"} : {}),
+        return m('tr', (l.id === activeListId ? {class: "info"} : {}),
             m('td',
                 m(m.route.Link, {href: `/project/${l.project_id}/list/${l.id}`}, l.name)
             ),

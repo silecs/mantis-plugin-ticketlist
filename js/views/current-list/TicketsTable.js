@@ -24,7 +24,7 @@ const IssueCheckbox = {
             onchange(event) {
                 selectable.length = 0
                 const inputs = event.target.closest('tbody').querySelectorAll('input.selected-issues:checked')
-                for (let input of inputs) {
+                for (const input of inputs) {
                     const id = parseInt(input.value, 10)
                     if (!isNaN(id) && id > 0) {
                         selectable.push(id)

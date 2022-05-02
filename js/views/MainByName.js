@@ -13,7 +13,7 @@ export default {
             },
             withCredentials: true,
         }).then(function(l) {
-            let url = `/project/${vnode.attrs.projectId}/list/${l.id}`
+            const url = `/project/${vnode.attrs.projectId}/list/${l.id}`
             const issueIds = m.route.param('issueIds')
             if (!issueIds) {
                 m.route.set(url)
@@ -24,7 +24,7 @@ export default {
             alert(`Erreur en lisant l'api GET /list`)
         })
     },
-    view(vnode) {
+    view() {
         return null
     },
 }

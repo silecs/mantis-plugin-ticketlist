@@ -29,11 +29,7 @@ function fetchListById(id) {
         },
         withCredentials: true,
     }).then(function(result) {
-        if (result === null) {
-            serverData.content = null
-        } else {
-            serverData.content = result
-        }
+        serverData.content = result
         return result
     }).catch(function() {
         alert(`Erreur en lisant l'api /list/${id}`)
@@ -45,11 +41,11 @@ function fetchListById(id) {
 function parseIdsText(str) {
     const lines = str.split(/\n/)
     const ids = []
-    for (let line of lines) {
+    for (const line of lines) {
         if (!line.match(/^\s*\d+/)) {
             continue;
         }
-        for (let num of line.split(/[\s,]+/)) {
+        for (const num of line.split(/[\s,]+/)) {
             if (num.length < 4 || num.length > 5) {
                 continue
             }
@@ -133,7 +129,7 @@ export default {
             loading = fetchListById(id)
         }
         loading.then(function(result) {
-            content = Object.assign({}, serverData.content ?? emptyList);
+            content = Object.assign({}, result ?? emptyList);
             if (content.ids.match(/^[\d,]+$/)) {
                 content.ids = content.ids.replaceAll(',', "\n") + "\n"
             }

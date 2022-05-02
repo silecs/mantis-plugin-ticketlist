@@ -91,7 +91,7 @@ export default {
                 return loading.promise;
             }
             if (loading.xhr.length > 0) {
-                for (let xhr of loading.xhr) {
+                for (const xhr of loading.xhr) {
                     xhr.abort()
                 }
                 loading.xhr = []

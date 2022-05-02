@@ -9,7 +9,7 @@ import Tickets from "../models/Tickets"
 function updateList(projectId, k) {
     List.setProjectId(projectId)
 
-    let listId = parseInt(k, 10)
+    const listId = parseInt(k, 10)
     if (isNaN(listId) || listId < 0) {
         List.reset()
         return Tickets.load([], projectId)
@@ -25,9 +25,9 @@ export default {
         Project.load(projectId)
 
         updateList(projectId, vnode.attrs.key).then(function() {
-            const issueIds = m.route.param('issueIds')
-            if (issueIds) {
-                const issuesFiltered = issuesIds.split(",")
+            const issueIds = m.route.param('issueIds') ?? ''
+            if (issueIds !== '') {
+                const issuesFiltered = issueIds.split(",")
                     .map(x => parseInt(x, 10))
                     .filter(x => !isNaN(x) && x > 0)
                     .join("\n")

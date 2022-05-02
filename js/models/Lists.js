@@ -1,4 +1,5 @@
 import m from "mithril"
+import Alerts from "./Alerts"
 
 let content = []
 
