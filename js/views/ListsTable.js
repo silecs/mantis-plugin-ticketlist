@@ -1,4 +1,5 @@
 import m from "mithril"
+import List from "../models/List";
 import Lists from "../models/Lists"
 import Project from "../models/Project"
 
@@ -48,7 +49,15 @@ const ListTr = {
         const l = vnode.attrs.list
         return m('tr', (l.id === activeListId ? {class: "info"} : {}),
             m('td',
-                m(m.route.Link, {href: `/project/${l.project_id}/list/${l.id}`}, l.name)
+                m(m.route.Link, {
+                    onclick(event) {
+                        if (List.hasChanged() && !confirm("Charger cette liste abandonnera les modifications en cours sur la liste actuelle. Continuer ?")) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                    },
+                    href: `/project/${l.project_id}/list/${l.id}`},
+                    l.name)
             ),
             m('td', m(DateTime, {date: l.last_update})),
         );
@@ -60,7 +69,9 @@ const DateTime = {
         if (!(date instanceof Date)) {
             return ""
         }
-        return date.toISOString().substring(0, 16).replace('T', ' ')
+        return date.toISOString().substring(0, 10) +
+            " " +
+            date.toLocaleTimeString('fr-FR').substring(0, 5)
     },
     isRecent(date) {
         if (!(date instanceof Date)) {
