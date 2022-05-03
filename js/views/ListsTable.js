@@ -60,7 +60,9 @@ const DateTime = {
         if (!(date instanceof Date)) {
             return ""
         }
-        return date.toISOString().substring(0, 16).replace('T', ' ')
+        return date.toISOString().substring(0, 10) +
+            " " +
+            date.toLocaleTimeString('fr-FR').substring(0, 5)
     },
     isRecent(date) {
         if (!(date instanceof Date)) {
