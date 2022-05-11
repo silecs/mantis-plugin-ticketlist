@@ -13,13 +13,13 @@ class GetTicketTime extends Action
     {
         $idList = join(',', $ids);
         $query = new DbQuery();
-        $sql = "SELECT sum(n.time_tracking) AS total FROM {bug} JOIN {bugnote} n ON bug.id = n.bug_id WHERE bug.id in ($idList)";
+        $sql = "SELECT sum(n.time_tracking) AS total FROM {bug} bug JOIN {bugnote} n ON bug.id = n.bug_id WHERE bug.id IN ($idList)";
         if ($projectId > 0) {
             $sql .= " AND bug.project_id = {$projectId}";
         }
         $query->sql($sql);
         $rows = $query->fetch_all();
-        if (!$rows) {
+        if (empty($rows)) {
             return [
                 'minutes' => 0,
                 'time' => "",
@@ -45,21 +45,24 @@ class GetTicketTime extends Action
         if (!$rows) {
             return null;
         }
+        $ts = (int) $rows[0]['date_order'];
         $result = [
             'id' => (int) $rows[0]['id'],
             'name' => $rows[0]['version'],
             'description' => $rows[0]['description'],
-            'publicationTimestamp' => (int) $rows[0]['date_order'],
+            'publicationTimestamp' => $ts,
         ];
 
-        $query->sql("$sql AND date_submitted > {$result['publicationTimestamp']}");
-        $rows = $query->fetch_all();
-        if ($rows) {
-            $result['minutesSinceRelease'] = (int) $rows[0]['total'];
-            $result['timeSinceRelease'] = db_minutes_to_hhmm((int) $row['total']);
-        } else {
+        // If reusing the same $query, no error, but fetch_all() would return [].
+        $query2 = new DbQuery();
+        $query2->sql("$sql AND n.date_submitted > {$ts}");
+        $rows = $query2->fetch_all();
+        if (empty($rows)) {
             $result['minutesSinceRelease'] = 0;
             $result['timeSinceRelease'] = '00:00';
+        } else {
+            $result['minutesSinceRelease'] = (int) $rows[0]['total'];
+            $result['timeSinceRelease'] = db_minutes_to_hhmm((int) $rows[0]['total']);
         }
         return $result;
     }
