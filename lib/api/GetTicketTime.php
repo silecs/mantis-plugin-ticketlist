@@ -46,6 +46,7 @@ class GetTicketTime extends Action
             return null;
         }
         $result = [
+            'id' => (int) $rows[0]['id'],
             'name' => $rows[0]['version'],
             'description' => $rows[0]['description'],
             'publicationTimestamp' => (int) $rows[0]['date_order'],
