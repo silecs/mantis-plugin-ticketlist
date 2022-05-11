@@ -90,10 +90,23 @@ const TimeSpent = {
         }
         return m('div', 
             `Temps total consacré à ces tickets : ${timeSpent.time}`,
-            timeSpent.minutes > 0 && timeSpent.release && timeSpent.release.name
-                ? ["dont ", m('strong', timeSpent.timeSinceRelease), " depuis la livraison ", m('em', timeSpent.release.name)]
-                : null
+            (timeSpent.minutes > 0 ? m(TimeSpentSinceRelease, {release: timeSpent.release}) : null),
         );
+    },
+}
+
+const TimeSpentSinceRelease = {
+    view(vnode) {
+        const release = vnode.attrs.release
+        if (release === null || release.name === '') {
+            return null
+        }
+        return m('span', [
+            " dont ",
+            m('strong', release.timeSinceRelease),
+            " depuis la livraison ",
+            m('a', {href: `/changelog_page.php?version_id=${release.id}`}, release.name),
+        ]);
     },
 }
 

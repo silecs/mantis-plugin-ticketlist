@@ -31,22 +31,36 @@ class GetTicketTime extends Action
         ];
 
         if ($projectId > 0) {
-            $query->sql = "SELECT * FROM {project_version} WHERE project_id = {$projectId} ORDER BY id DESC LIMIT 1";
-            $rows = $query->fetch_all();
-            if ($rows) {
-                $result["release"] = [
-                    'name' => $rows[0]['version'],
-                    'description' => $rows[0]['description'],
-                    'publicationTimestamp' => (int) $rows[0]['date_order'],
-                ];
-
-                $query->sql("$sql AND date_submitted > {$result['release']['publicationTimestamp']}");
-                $rows = $query->fetch_all();
-                $result['minutesSinceRelease'] = (int) $rows[0]['total'];
-                $result['timeSinceRelease'] = db_minutes_to_hhmm((int) $row['total']);
-            }
+            $result["release"] = self::fetchLastRelease($projectId, $sql);
         }
 
+        return $result;
+    }
+
+    private static function fetchLastRelease(int $projectId, string $sql): ?array
+    {
+        $query = new DbQuery();
+        $query->sql("SELECT * FROM {project_version} WHERE project_id = {$projectId} ORDER BY id DESC LIMIT 1");
+        $rows = $query->fetch_all();
+        if (!$rows) {
+            return null;
+        }
+        $result = [
+            'id' => (int) $rows[0]['id'],
+            'name' => $rows[0]['version'],
+            'description' => $rows[0]['description'],
+            'publicationTimestamp' => (int) $rows[0]['date_order'],
+        ];
+
+        $query->sql("$sql AND date_submitted > {$result['publicationTimestamp']}");
+        $rows = $query->fetch_all();
+        if ($rows) {
+            $result['minutesSinceRelease'] = (int) $rows[0]['total'];
+            $result['timeSinceRelease'] = db_minutes_to_hhmm((int) $row['total']);
+        } else {
+            $result['minutesSinceRelease'] = 0;
+            $result['timeSinceRelease'] = '00:00';
+        }
         return $result;
     }
 }
