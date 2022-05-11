@@ -5,10 +5,10 @@ let content = []
 
 let timeSpent = {
     time: "",
-    timeSinceRelease: "",
     release: {
         name: "",
         publicationTimestamp: 0,
+        timeSinceRelease: "",
     }
 }
 

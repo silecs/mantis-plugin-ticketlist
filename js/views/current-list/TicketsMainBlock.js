@@ -90,8 +90,8 @@ const TimeSpent = {
         }
         return m('div', 
             `Temps total consacré à ces tickets : ${timeSpent.time}`,
-            timeSpent.minutes > 0 && timeSpent.release && timeSpent.release.name
-                ? ["dont ", m('strong', timeSpent.timeSinceRelease), " depuis la livraison ", m('em', timeSpent.release.name)]
+            (timeSpent.minutes > 0) && (timeSpent.release !== null) && (timeSpent.release.name !== '')
+                ? [", dont ", m('strong', timeSpent.release.timeSinceRelease), " depuis la livraison ", m('em', timeSpent.release.name)]
                 : null
         );
     },
