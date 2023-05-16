@@ -28,7 +28,7 @@ export default {
                     title: `Non validés`,
                 },
                 m(TicketsTable, {
-                    tickets: tickets.filter(t => t.status <= STATUS_RESOLVED),
+                    tickets: tickets.filter(t => t.status <= STATUS_RESOLVED).sort((a, b) => a.id - b.id),
                 }),
             ),
             m(WidgetBox, {
@@ -36,7 +36,7 @@ export default {
                     title: `Dev non fini`,
                 },
                 m(TicketsTable, {
-                    tickets: tickets.filter(t => t.status < STATUS_RESOLVED),
+                    tickets: tickets.filter(t => t.status < STATUS_RESOLVED).sort((a, b) => a.id - b.id),
                 }),
             ),
         );
