@@ -1,5 +1,6 @@
 <?php
 
+use ticketlist\ActionOnIssue;
 use ticketlist\IssueList;
 
 require_api('lang_api.php');
@@ -46,7 +47,7 @@ if (!empty($_POST['confirm'])) {
         bug_group_action_print_results($issues->getFailedActions());
         bug_group_action_print_bottom();
     } else {
-        print_header_redirect(plugin_page('list') . '&ids=' . $issues->listBugIds());
+        print_header_redirect(plugin_page('index') . '&ids=' . $issues->listBugIds());
     }
     return;
 }

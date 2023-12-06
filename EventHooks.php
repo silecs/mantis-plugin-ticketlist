@@ -63,7 +63,7 @@ trait EventHooks
 
     protected function isPluginRequested(string $page = ''): bool
     {
-        if (strpos($_SERVER['REQUEST_URI'], "plugin.php") === false) {
+        if (strpos($_SERVER['REQUEST_URI'] ?? '', "plugin.php") === false) {
             return false;
         }
         $pageRequested = $_GET['page'] ?? '';
