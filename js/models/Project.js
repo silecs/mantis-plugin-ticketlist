@@ -59,7 +59,6 @@ export default {
     readJsonBlock(name) {
         const htmlElement = document.getElementById(name)
         if (htmlElement === null) {
-            console.log(`invalid HTML : element #${name} was not found.`)
             return;
         }
         content = JSON.parse(htmlElement.textContent)

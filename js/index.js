@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const rootElement = document.getElementById('ticketlist-container')
     if (rootElement === null) {
-        alert("invalid HTML")
         return;
     }
     m.route(
