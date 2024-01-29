@@ -7,7 +7,8 @@ const ListTitle = {
     view(vnode) {
         return [
             m('span',
-                "Sélection ",
+                List.get().name || "…",
+                " ",
                 List.hasChanged()
                     ? m('i.fa.fa-exclamation-triangle', {title: "Les modifications locales ne sont pas encore enregistrées.", style: "color: #800000"})
                     : null,
