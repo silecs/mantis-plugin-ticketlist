@@ -1,4 +1,5 @@
 import m from "mithril"
+import Filter from "../../models/Filter";
 import List from "../../models/List";
 import Project from "../../models/Project";
 import Tickets from "../../models/Tickets";
@@ -6,6 +7,30 @@ import TicketsTable from "./TicketsTable";
 import WidgetBox from "./WidgetBox";
 
 let massCloseMode = false
+
+const refresh = () => {
+    RefreshButton.loading = true
+    Tickets.load(List.getTicketIds(), List.get().projectId).then(() => {
+        RefreshButton.loading = false
+    });
+}
+
+function updateFilterState(name) {
+    return (value) => {
+        if (value.match(/^\d{4}-\d\d-\d\d$/)) {
+            if (Filter.state[name] !== value) {
+                Filter.state[name] = value
+                refresh()
+            }
+            return true;
+        }
+        if (Filter.state[name] !== '') {
+            Filter.state[name] = ''
+            refresh()
+        }
+        return false
+    };
+}
 
 const BlockTitle = {
     view(vnode) {
@@ -31,12 +56,7 @@ const RefreshButton = {
                 class: 'btn btn-default btn-sm',
                 title: "Relire les états de ces tickets sur le serveur",
                 type: 'button',
-                onclick: () => {
-                    this.loading = true
-                    Tickets.load(List.getTicketIds(), List.get().projectId).then(() => {
-                        this.loading = false
-                    });
-                },
+                onclick: refresh,
                 disabled: this.loading,
             },
             this.loading ? m('i.fa.fa-spinner') : m('i.fa.fa-refresh')
@@ -82,15 +102,44 @@ const MassCloseButton = {
     },
 }
 
+const DateInput = {
+    oninit(vnode) {
+        vnode.state.valid = false
+    },
+    view(vnode) {
+        return m("div.form-group",
+            (vnode.state.valid ? { "class": "has-success has-feedbak", style: "position:relative"} : {}),
+            [
+                m('input.form-control', {placeholder: 'YYYY-MM-DD', size: "11", oninput: function() {
+                    vnode.state.valid = vnode.attrs.oninput(this.value)
+                }}),
+                m('span.glyphicon.glyphicon-ok.form-control-feedback' + (vnode.state.valid ? "" : ".hidden"), {"aria-hidden": "true"}),
+            ]
+        )
+    },
+}
+
+const TimeFilter = {
+    view() {
+        return m('details', {style: "margin-top: 1ex"}, [
+            m('summary', {style: "display: list-item"}, "Filtrer par dates"),
+            m('div.form-inline',
+                "De ",
+                m(DateInput, {oninput: updateFilterState("start")}),
+                " à ",
+                m(DateInput, {oninput: updateFilterState("end")}),
+            ),
+        ]);
+    },
+}
+
 const TimeSpent = {
     view() {
         const timeSpent = Tickets.getTimeSpent()
-        if (!timeSpent || !timeSpent.minutes) {
-            return null
-        }
-        return m('div', 
+        return m('div',
             `Temps total consacré à ces tickets : ${timeSpent.time}`,
             (timeSpent.minutes > 0 ? m(TimeSpentSinceRelease, {release: timeSpent.release}) : null),
+            m(TimeFilter),
         );
     },
 }

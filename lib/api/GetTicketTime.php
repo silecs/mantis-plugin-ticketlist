@@ -9,7 +9,7 @@ use DbQuery;
  */
 class GetTicketTime extends Action
 {
-    public function run(array $ids, int $projectId)
+    public function run(array $ids, int $projectId, string $dateStart, string $dateEnd)
     {
         $idList = join(',', $ids);
         $query = new DbQuery();
@@ -17,6 +17,16 @@ class GetTicketTime extends Action
         if ($projectId > 0) {
             $sql .= " AND bug.project_id = {$projectId}";
         }
+
+        // dates
+        if ($dateStart && $dateEnd) {
+            $sql .= " AND n.date_submitted BETWEEN {$dateStart} AND {$dateEnd}";
+        } elseif ($dateStart && !$dateEnd) {
+            $sql .= " AND n.date_submitted >= {$dateStart}";
+        } elseif (!$dateStart && $dateEnd) {
+            $sql .= " AND n.date_submitted <= {$dateEnd}";
+        }
+
         $query->sql($sql);
         $rows = $query->fetch_all();
         if (empty($rows)) {

@@ -10,15 +10,34 @@ use MantisEnum;
  */
 class GetTicket extends Action
 {
-    public function run(array $ids, int $projectId)
+    public function run(array $ids, int $projectId, int $dateStart, int $dateEnd)
     {
         $idList = join(',', $ids);
+
+        // dates
+        $dateCondition = "";
+        if ($dateStart && $dateEnd) {
+            $dateCondition = "n.date_submitted BETWEEN {$dateStart} AND {$dateEnd}";
+        } elseif ($dateStart && !$dateEnd) {
+            $dateCondition = "n.date_submitted >= {$dateStart}";
+        } elseif (!$dateStart && $dateEnd) {
+            $dateCondition = "n.date_submitted <= {$dateEnd}";
+        }
         $sql = <<<EOSQL
             SELECT b.id, b.status, b.summary, b.project_id
             FROM {bug} b
-            WHERE b.id in ($idList)
-            ORDER BY find_in_set(b.id, '$idList') ASC
             EOSQL;
+        if ($dateCondition) {
+            $sql .= <<<EOSQL
+                    JOIN {bugnote} n ON b.id = n.bug_id
+                WHERE b.id in ($idList) AND $dateCondition
+                GROUP BY b.id
+                EOSQL;
+        } else {
+            $sql .= " WHERE b.id in ($idList)";
+        }
+        $sql .= " ORDER BY find_in_set(b.id, '$idList') ASC";
+
         $query = new DbQuery();
         $query->sql($sql);
         $rows = $query->fetch_all() ?: [];
@@ -29,7 +48,7 @@ class GetTicket extends Action
     private static function formatResults(array $rows, int $projectId): array
     {
         if (!$rows) {
-            return ['tickets' => '', 'message' => ''];
+            return ['tickets' => [], 'message' => ''];
         }
 
         $tickets = [];
