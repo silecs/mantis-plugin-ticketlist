@@ -48,7 +48,7 @@ class GetTicket extends Action
     private static function formatResults(array $rows, int $projectId): array
     {
         if (!$rows) {
-            return ['tickets' => '', 'message' => ''];
+            return ['tickets' => [], 'message' => ''];
         }
 
         $tickets = [];
