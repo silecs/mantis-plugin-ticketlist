@@ -20,7 +20,7 @@ class GetTicketTime extends Action
 
         // dates
         if ($dateStart && $dateEnd) {
-            $sql .= " AND n.date_submitted BETWEEN {$dateStart} AND {$dateEnd}'";
+            $sql .= " AND n.date_submitted BETWEEN {$dateStart} AND {$dateEnd}";
         } elseif ($dateStart && !$dateEnd) {
             $sql .= " AND n.date_submitted >= {$dateStart}";
         } elseif (!$dateStart && $dateEnd) {
