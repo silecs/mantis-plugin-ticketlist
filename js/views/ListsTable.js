@@ -97,6 +97,20 @@ const DateTime = {
     },
 }
 
+const HideButton = {
+    view(vnode) {
+        return m('button.btn.btn-primary.btn-sm',
+            {
+                type: 'button',
+                onclick: function() {
+                    document.getElementById("lists-table").setAttribute('style', 'disaplay: none');
+                },
+            },
+            [m('i.fa.fa-eye'), " Cacher"]
+        );
+    },
+}
+
 const RefreshButton = {
     view(vnode) {
         return m('button.btn.btn-primary.btn-sm',
@@ -122,6 +136,7 @@ export default {
         return m('div#lists-table',
             m(ListsTable),
             m("div.actions",
+                m(HideButton),
                 m(RefreshButton, {projectId: vnode.attrs.projectId}),
             ),
         );
