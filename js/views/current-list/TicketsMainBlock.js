@@ -8,12 +8,28 @@ import WidgetBox from "./WidgetBox";
 
 let massCloseMode = false
 
-function refresh() {
+const refresh = () => {
     RefreshButton.loading = true
     Tickets.load(List.getTicketIds(), List.get().projectId).then(() => {
         RefreshButton.loading = false
     });
-    m.render()
+}
+
+function updateFilterState(name) {
+    return (value) => {
+        if (value.match(/^\d{4}-\d\d-\d\d$/)) {
+            if (Filter.state[name] !== value) {
+                Filter.state[name] = value
+                refresh()
+            }
+            return true;
+        }
+        if (Filter.state[name] !== '') {
+            Filter.state[name] = ''
+            refresh()
+        }
+        return false
+    };
 }
 
 const BlockTitle = {
@@ -109,35 +125,9 @@ const TimeFilter = {
             m('summary', {style: "display: list-item"}, "Filtrer par dates"),
             m('div.form-inline',
                 "De ",
-                m(DateInput, {oninput: (value) => {
-                    if (value.match(/^\d{4}-\d\d-\d\d$/)) {
-                        if (Filter.state.start !== value) {
-                            Filter.state.start = value
-                            refresh()
-                        }
-                        return true;
-                    }
-                    if (Filter.state.start !== '') {
-                        Filter.state.start = ''
-                        refresh()
-                    }
-                    return false
-                }}),
+                m(DateInput, {oninput: updateFilterState("start")}),
                 " à ",
-                m(DateInput, {oninput: () => {
-                    if (value.match(/^\d{4}-\d\d-\d\d$/)) {
-                        if (Filter.state.end !== value) {
-                            Filter.state.end = value
-                            refresh()
-                        }
-                        return true;
-                    }
-                    if (Filter.state.end !== '') {
-                        Filter.state.end = ''
-                        refresh()
-                    }
-                    return false
-                }}),
+                m(DateInput, {oninput: updateFilterState("end")}),
             ),
         ]);
     },
@@ -146,9 +136,6 @@ const TimeFilter = {
 const TimeSpent = {
     view() {
         const timeSpent = Tickets.getTimeSpent()
-        if (!timeSpent || !timeSpent.minutes) {
-            return null
-        }
         return m('div',
             `Temps total consacré à ces tickets : ${timeSpent.time}`,
             (timeSpent.minutes > 0 ? m(TimeSpentSinceRelease, {release: timeSpent.release}) : null),

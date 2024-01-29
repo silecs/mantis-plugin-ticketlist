@@ -72,9 +72,18 @@ span.actions {
 #select-tickets {
     max-width: 50ex;
 }
-.ticket-count-0 .widget-box.tickets-block {
+#ticketlist-container .ticket-count-0 .widget-box.tickets-block-extra {
     /* "Ace Admin Theme" uses "!important", so we have to do the same. Sigh... */
     display: none !important;
+}
+
+#ticketlist-container .tickets-block {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#ticketlist-container .tickets-block > .widget-main {
+    flex-grow: 1;
 }
 
 .widget-header-small {

@@ -24,7 +24,7 @@ export default {
             ),
             m(TicketsMainBlock),
             m(WidgetBox, {
-                    class: 'tickets-block',
+                    class: 'tickets-block tickets-block-extra',
                     title: `Non validés`,
                 },
                 m(TicketsTable, {
@@ -32,7 +32,7 @@ export default {
                 }),
             ),
             m(WidgetBox, {
-                    class: 'tickets-block',
+                    class: 'tickets-block tickets-block-extra',
                     title: `Dev non fini`,
                 },
                 m(TicketsTable, {

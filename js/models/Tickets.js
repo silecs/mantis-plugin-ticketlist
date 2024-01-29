@@ -1,5 +1,6 @@
 import m from "mithril"
 import Alerts from "./Alerts";
+import Filter from "./Filter";
 
 let content = []
 
@@ -27,6 +28,8 @@ function fetchTickets(idsString, projectId) {
             action: "ticket",
             id: idsString,
             projectId,
+            dateStart: Filter.state.start,
+            dateEnd: Filter.state.end,
         },
         withCredentials: true,
         config: function(xhr) {
@@ -52,6 +55,8 @@ function fetchTicketsTime(idsString, projectId) {
             action: "ticket/time",
             id: idsString,
             projectId,
+            dateStart: Filter.state.start,
+            dateEnd: Filter.state.end,
         },
         withCredentials: true,
         config: function(xhr) {
