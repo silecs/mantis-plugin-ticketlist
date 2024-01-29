@@ -5,6 +5,7 @@ import CurrentList from "./CurrentList"
 import Project from "../models/Project"
 import List from "../models/List"
 import Tickets from "../models/Tickets"
+import {base64} from "../lib.js"
 
 function updateList(projectId, k) {
     List.setProjectId(projectId)
@@ -26,12 +27,14 @@ export default {
 
         updateList(projectId, vnode.attrs.key).then(function() {
             const issueIds = m.route.param('issueIds') ?? ''
-            if (issueIds !== '') {
+            if (issueIds.match(/^\d[\d,]+$/)) {
                 const issuesFiltered = issueIds.split(",")
                     .map(x => parseInt(x, 10))
                     .filter(x => !isNaN(x) && x > 0)
                     .join("\n")
                 List.setText(issuesFiltered)
+            } else if (issueIds !== '') {
+                List.setText(base64.decodeToString(issueIds))
             }
         })
     },
