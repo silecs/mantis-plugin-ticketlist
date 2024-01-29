@@ -14,11 +14,13 @@ const FormGroup = {
 
 const ListContent = {
     view(vnode) {
+        const ids = List.get().ids
+        const numLineFeeds = (ids.match(/\n/g) || []).length
         return m(FormGroup, {label: "Tickets #"},
             // TODO Button to sort the ticket numbers? (only if every line is empty or a ticket number)
             m('textarea.form-control', {
                 cols:10,
-                rows:20,
+                rows: Math.min(30, Math.max(12, 1 + numLineFeeds)),
                 placeholder: "Pour les lignes commençant par un numéro de ticket, tous les tickets référencés dans le texte sont affichés.\n\nLe reste est vu comme un commentaire.",
                 oninput() {
                     List.setText(this.value)
@@ -27,7 +29,7 @@ const ListContent = {
                         Tickets.load(ticketIds, List.get().projectId)
                     }
                 },},
-                List.get().ids
+                ids
             )
         );
     },
