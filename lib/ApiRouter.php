@@ -97,8 +97,10 @@ class ApiRouter
         if (!$ids) {
             return $this->returnError(400, "Missing parameter (comma separated integer list): id");
         }
+        $dateStart = self::readUrlDate('dateStart');
+        $dateEnd = self::readUrlDate('dateEnd');
         $this->setAction(new api\GetTicket());
-        return $this->response->action->run($ids, Request::readProjectId());
+        return $this->response->action->run($ids, Request::readProjectId(), $dateStart, $dateEnd);
     }
 
     private function dispatchTicketTime()
@@ -111,8 +113,10 @@ class ApiRouter
         if (!$ids) {
             return $this->returnError(400, "Missing parameter (comma separated integer list): id");
         }
+        $dateStart = self::readUrlDate('dateStart');
+        $dateEnd = self::readUrlDate('dateEnd');
         $this->setAction(new api\GetTicketTime());
-        return $this->response->action->run($ids, Request::readProjectId());
+        return $this->response->action->run($ids, Request::readProjectId(), $dateStart, $dateEnd);
     }
 
     private function returnError(int $code, $message)
@@ -129,5 +133,15 @@ class ApiRouter
     private function setResult($r): void
     {
         $this->response->result = $r;
+    }
+
+    private static function readUrlDate(string $name): int
+    {
+        $date = $_GET[$name] ?? '';
+        $m = [];
+        if (!preg_match('/^(\d{4})-(\d\d)-(\d\d)$/', $date, $m)) {
+            return 0;
+        }
+        return mktime(12, 0, 0, (int) $m[2], (int) $m[3], (int) $m[1]);
     }
 }
