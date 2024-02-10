@@ -8,15 +8,13 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "mithril": "^2.0.4",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^4.9.2"
-  },
-  "scripts": {
-    "build": "webpack build --mode production --entry ./js/index.js --output-path ./files/",
-    "dev": "webpack --mode development --devtool source-map --watch --entry ./js/index.js --output-path ./files/"
+    "mithril": "^2.2.2"
   },
   "devDependencies": {
-    "eslint": "^8.14.0"
+    "esbuild": "^0.20.0"
+  },
+  "scripts": {
+    "build": "esbuild ./js/index.js --bundle --minify --outfile=files/main.js",
+    "dev": "esbuild ./js/index.js --bundle --watch --outfile=files/main.js"
   }
 }
