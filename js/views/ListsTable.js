@@ -103,7 +103,7 @@ const HideButton = {
             {
                 type: 'button',
                 onclick: function() {
-                    document.getElementById("lists-table").setAttribute('style', 'disaplay: none');
+                    document.getElementById("lists-table").setAttribute('style', 'display: none');
                 },
             },
             [m('i.fa.fa-eye'), " Cacher"]
