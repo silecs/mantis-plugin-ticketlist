@@ -5,6 +5,7 @@ use ticketlist\IssueList;
 
 require_api('lang_api.php');
 require_api('version_api.php');
+require_css( 'status_config.php' );
 
 auth_ensure_user_authenticated();
 access_ensure_project_level(config_get('manage_site_threshold'));
