@@ -109,8 +109,12 @@ layout_page_begin();
                     EOSQL;
                 $query->sql($sql);
                 $rows = $query->fetch_all();
-                ?>                
-                <div>Temps total consacré à ces tickets : <?= db_minutes_to_hhmm((int) $rows[0]['total']) ?></div>
+                if ($rows) {
+                    ?>
+                    <div>Temps total consacré à ces tickets : <?= db_minutes_to_hhmm((int) $rows[0]['total']) ?></div>
+                    <?php
+                }
+                ?>
             </div>
         </div>
     </section>

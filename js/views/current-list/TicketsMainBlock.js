@@ -135,7 +135,7 @@ const TimeFilter = {
 
 const TimeSpent = {
     view() {
-        const timeSpent = Tickets.getTimeSpent()
+        const timeSpent = Tickets.getTimeSpent() || 0
         return m('div',
             `Temps total consacré à ces tickets : ${timeSpent.time}`,
             (timeSpent.minutes > 0 ? m(TimeSpentSinceRelease, {release: timeSpent.release}) : null),
@@ -172,7 +172,6 @@ export default {
                 title: m(BlockTitle, {tickets}),
                 footer: m(TimeSpent),
             },
-            [
                 m(TicketsTable, {
                     tickets: tickets,
                     selectable: massCloseMode ? this.selection : null,
@@ -180,7 +179,6 @@ export default {
                 m('div.actions', {style: "text-align: right"},
                     m(MassCloseButton, {selection: this.selection}),
                 ),
-            ]
         );
     },
 }
