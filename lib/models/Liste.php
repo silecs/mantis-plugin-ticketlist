@@ -84,6 +84,9 @@ class Liste
             $history = [$current];
         } else {
             $history = \json_decode($record->history, true);
+            if (count($history) > 10) {
+                $history = array_slice($history, -10);
+            }
             array_push($history, $current);
         }
         return \json_encode($history, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE);
