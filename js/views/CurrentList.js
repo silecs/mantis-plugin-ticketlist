@@ -23,22 +23,6 @@ export default {
                 m(ListConflictBlock),
             ),
             m(TicketsMainBlock),
-            m(WidgetBox, {
-                    class: 'tickets-block tickets-block-extra',
-                    title: `Non validés`,
-                },
-                m(TicketsTable, {
-                    tickets: tickets.filter(t => t.status <= STATUS_RESOLVED).sort((a, b) => a.id - b.id),
-                }),
-            ),
-            m(WidgetBox, {
-                    class: 'tickets-block tickets-block-extra',
-                    title: `Dev non fini`,
-                },
-                m(TicketsTable, {
-                    tickets: tickets.filter(t => t.status < STATUS_RESOLVED).sort((a, b) => a.id - b.id),
-                }),
-            ),
         );
     },
 }
