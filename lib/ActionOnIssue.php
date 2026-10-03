@@ -95,7 +95,9 @@ class ActionOnIssue
         if ($bug->status < $this->resolvedBugThreshold) {
             bug_set_field($bug->id, 'status', $this->resolvedBugThreshold);
         }
-        bug_set_field($bug->id, 'fixed_in_version', $this->fixedInVersion);
+        if (!$bug->fixed_in_version) {
+            bug_set_field($bug->id, 'fixed_in_version', $this->fixedInVersion);
+        }
         return true;
     }
 
